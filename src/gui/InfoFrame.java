@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
+//import javax.swing.JTextArea;
 import java.awt.*;
 
 public class InfoFrame extends JFrame {
@@ -30,8 +30,8 @@ public class InfoFrame extends JFrame {
 	}
 	
 	public InfoFrame(String title,String fileName){
-	this.title=title;
-	this.fileName=fileName;
+		InfoFrame.title=title;
+		InfoFrame.fileName=fileName;
 	init();
 	this.setTitle(title);
 	try {

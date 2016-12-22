@@ -196,17 +196,12 @@ public class MainFrame extends JFrame {
 					lexAnalyse=new LexAnalyse(sourseFile.getText());
 					parser=new Parser(lexAnalyse);
 					parser.grammerAnalyse();
-					fourElementPath=parser.outputFourElem();
+					fourElementPath=parser.outputFourElem1();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				Toolkit toolkit = Toolkit.getDefaultToolkit();
-				Dimension screen = toolkit.getScreenSize();
 				huibian inf = new huibian("目标代码生成", fourElementPath);
-				inf.setSize(750,480);
-				inf.setLocation(screen.width / 2 - inf.getWidth() / 2, screen.height
-						/ 2 - inf.getHeight() / 2);
 				inf.setVisible(true);
 			}
 		});

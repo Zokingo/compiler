@@ -1,0 +1,96 @@
+1、构造LL1属性翻译文法
+构造LL1属性翻译文法即在原有LL1文法基础上加上动作符号，并给非终结符和终结符加上一定属性，给动作符号加上语义子程序。
+对原有LL1文法改进的地方如下：
+1、	赋值：
+产生式			语义子程序
+R->@ASS_R id =L @EQ;
+-------------------------------
+R->id @ASS_R = R'//待测试
+R'->L @EQ;|P@EQ;
+
+@ASS_R{R.VAL=id并压入语义栈}
+@EQ{RES=R.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}
+
+U->@ASS_U id U’ 		@ASS_U{U.VAL=id并压入语义栈}
+U’->=L|$ @EQ_U’ 	    @EQ_U’{RES=U.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}
+-----------------------------------------------------
+U->id @ASS_U U’			@ASS_U{U.VAL=id并压入语义栈}
+U'->=K|$|[num];			//数组的简单声明
+K->L|P @EQ_U’          @EQ_U’{RES=U.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}//如果U'->$则不用执行语义动作
+
+
+2、	算术运算：
+产生式			语义子程序
+
+L->TL’@ADD_SUB	 		@ADD_SUB{If(OP!=null) RES= NEWTEMP; L.VAL=RES,并压入语义栈;New fourElement(OP, T.VAL;,L’VAL, RES)，}
+L’->+L@ADD				@ADD{OP=+,ARG2=L.VAL}
+L’->-L@SUB				@SUB{OP=-,ARG2=L.VAL}
+L’->$		
+T->FT’@DIV_MUL			@DIV_MUL{ if (OP !=null) RES= NEWTEMP;T.VAL=RES; new FourElement(OP,F.VAL,ARG2, RES)else ARG1=F.VAL; }
+T’->/T@DIV				@DIV{OP=/,ARG2=T.VAL}
+T’->*T@MUL	 			@MUL{OP=*,ARG2=T.VAL}
+T’->$
+F->(L)@VOL				@VOL{F.VAL->L.VAL}
+
+F->@ASS_F num|id		@ASS_F{F.VAL=num|id}
+
+Q->idO|$
+O->@SINGLE_OP++|--		@SINGLE_OP{OP=++|--}
+
+3、	布尔运算
+产生式			语义子程序
+
+G->FDF@COMPARE					@COMPARE{OP=D.VAL;ARG1=F(1).VAL;ARG2=F(2).VAL,RES=NEWTEMP; New fourElement(OP,F.VAL,ARG2, RES );G.VAL=RES并压入语义栈}
+D->@COMPARE_OP<|>|==|!=|<=|>=	@COMPARE_OP{D.VAL=<|>|==|!=,并压入语栈}
+
+4、	控制语句
+产生式			语义子程序
+B->if(G)@IF_FJ{A}@IF_BACKPATCH_FJ @IF_RJ else{A}@IF_BACKPATCH_RJ
+---------------------------------------------------------------------------------
+B->if(E)@IF_HEAD @IF_FJ {A} @IF_BACKPATCH_FJ  [ else@IF_EL@IFEL_FJ {A} @IFEL_BACKPATCH_FJ] @IF_END//文法加推导变换后待验证,if语句不用真跳
+@IF_HEAD{OP="if",ARG1=G.VAL;NEW fourElement(OP,ARG1,_, _ ),将其插入到四元式列表中第i个，弹栈}
+@IF_FJ{OP=”FJ”;RES=if_fj, New fourElement(OP,_,_, RES ),将其插入到四元式列表中第i个}
+//顺序执行
+@IF_BACKPATCH_FJ{回填前面假出口跳转四元式的跳转序号, BACKPATCH (i,if_fj)}
+@IF_EL{OP="el";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个}
+@IFEL_FJ{OP=”ELFJ”;ARG1=G.VAL;RES=ifel_fj, New fourElement(OP,ARG1,_, RES ),将其插入到四元式列表中第i个,弹栈}
+//顺序执行
+@IFEL_BACKPATCH_FJ{回填前面假出口跳转四元式的跳转序号, BACKPATCH (i,ifel_fj)}//可能和if_fj公用
+@IF_END{OP="end";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个}
+---------------------------------------------------------------------------------
+
+@IF_RJ{OP=”RJ”;ARG1=G.VAL;RES=if_fj, New fourElement(OP,ARG1,_, RES ),将其插入到四元式列表中第i个}
+
+
+--------------------------------------------------------------------------------------------------------
+B->while @WHILE_HEAD (G) @DO @WHILE_FJ {A}@WHILE_RJ @WHILE_BACKPATCH_FJ @WHILE_END
+@WHILE_HEAD{OP="wh";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个,将i存入wh_rj，存好真跳点的值i}
+//处理(G)
+@DO{OP=”do”;ARG1=G.VAL; New fourElement(OP,ARG1,_, _ ),将其插入到四元式列表中第i个,弹栈}
+@WHILE_FJ{OP=”wh_fj”;RES=wh_fj, New fourElement(OP,_,_, RES ),将其插入到四元式列表中第i个}
+//顺序执行
+@WHILE_RJ{OP=”RJ”;ARG1=G.VAL;RES=wh_rj, New fourElement(OP,ARG1,_, RES ),将其插入到四元式列表中第i个}
+@WHILE_BACKPATCH_FJ{回填前面假出口跳转四元式的跳转序号, BACKPATCH (i,wh_fj)}
+@WHILE_END{OP="we";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个}
+----------------------------------------------------------------------------------------------------------
+B->for(YZ;G@FOR_FJ;Q){A@SINGLE}@FOR_RJ@FOR_BACKPATCH_FJ			{参照if else }
+@SINGLE	{ARG1=id;RES=NEWTEMP;New fourElement(OP,ARG1,_,RES)}
+---------------------------------------------------------------------------
+B->for @FOR_HEAD (YZ;@FOR_LINE_RJ G @FOR_FJ;Q){A}@FOR_RJ @SINGLE @FOR_BACKPATCH_FJ @FOR_END
+@FOR_HEAD{OP="for";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个}
+//赋值操作
+//存好真跳点@FOR_LINE_RJ{}
+//逻辑运算操作
+@FOR_FJ{OP=”for_fj”;ARG1=G.VAL;RES=for_fj, New fourElement(OP,ARG1,_, RES ),将其插入到四元式列表中第i个}
+//顺序操作
+@FOR_RJ
+@SINGLE{ARG1=id;RES=NEWTEMP;New fourElement(OP,ARG1,_,RES)}
+@FOR_END{OP="fe";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个}
+
+
+说明：
+(1):R.VAL表示符号R的值，VAL是R的一个属性，其它类似。
+(2):NEWTEMP()函数：每调用一次生成一个临时变量，依次为T1,T2,…,Tn。
+(3):BACKPATCH (int i,int res):回填函数，用res回填第i个四元式的跳转地址。
+(4):new fourElement(String OP,String ARG1,String ARG2,String RES):生成一个四元式(OP,ARG1,ARG2,RES)
+

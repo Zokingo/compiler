@@ -1059,7 +1059,33 @@ public class Parser {
 		pw1.close();
 		return path+"/LL1.txt";
 	}
-
+	
+	//用于生成四元式
+	public String outputFourElem1() throws IOException{
+		
+		File file=new File("./output/");
+		if(!file.exists()){
+			file.mkdirs();
+			file.createNewFile();//如果这个文件不存在就创建它
+		}
+		String path=file.getAbsolutePath();
+		FileOutputStream fos=new FileOutputStream(path+"/FourElement1.txt");  
+		BufferedOutputStream bos=new BufferedOutputStream(fos); 
+		OutputStreamWriter osw1=new OutputStreamWriter(bos,"utf-8");
+		PrintWriter pw1=new PrintWriter(osw1);
+		pw1.println("生成的四元式如下");
+		pw1.println("序号（OP,ARG1，ARG2，RESULT）");
+		FourElement temp;
+		for(int i=0;i<fourElemList.size();i++){
+			temp=fourElemList.get(i);
+			pw1.println(temp.id+"("+temp.op+","+temp.arg1+","+temp.arg2+","+temp.result+")");
+		}
+		pw1.close();
+		
+		return path+"/FourElement1.txt";
+	}
+	
+	
 	public String outputFourElem() throws IOException{
 		
 		File file=new File("./output/");
