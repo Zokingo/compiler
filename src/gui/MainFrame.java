@@ -18,12 +18,16 @@ public class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	
+	//词法表:Token表、常量表、标识符表(词法分析)
+	//语义表:
+	
 	
 	TextArea 	sourseFile;//用来显示源文件的文本框
 	String 		soursePath;// 源文件路径
 	String 		LL1Path;
 	String 		wordListPath;
 	String 		synbolTablePath;
+	String 		TokenTablePath;
 	String 		fourElementPath;
 	LexAnalyse 	lexAnalyse;
 	
@@ -93,14 +97,38 @@ public class MainFrame extends JFrame {
 
 	private Component creatBottomPane() {
 		JPanel p = new JPanel(new FlowLayout());
+		JButton bt0 = new JButton("词法分析表");
 		JButton bt1 = new JButton("词法分析");
 		JButton bt2 = new JButton("语法分析");
 		JButton bt3 = new JButton("符号表生成");
 		JButton bt4 = new JButton("中间代码生成");
 		JButton bt5 = new JButton("目标代码生成");
-		bt1.addActionListener(new ActionListener() {
+		
+		bt0.addActionListener(new ActionListener() {
 
 			//@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					lexAnalyse=new LexAnalyse(sourseFile.getText());
+					TokenTablePath = lexAnalyse.outputToken();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				Toolkit toolkit = Toolkit.getDefaultToolkit();
+				Dimension screen = toolkit.getScreenSize();
+				InfoFrame inf = new InfoFrame("词法分析表", TokenTablePath);
+				inf.setSize(540,750);
+				inf.setLocation(screen.width / 2 - inf.getWidth() / 2, screen.height
+						/ 2 - inf.getHeight() / 2);
+				inf.setVisible(true);
+			}
+		});
+		
+		
+		bt1.addActionListener(new ActionListener() {
+
+			//@Override//outputToken
 			public void actionPerformed(ActionEvent e) {
 				try {
 					lexAnalyse=new LexAnalyse(sourseFile.getText());
@@ -205,10 +233,10 @@ public class MainFrame extends JFrame {
 				inf.setVisible(true);
 			}
 		});
-		
+		p.add(bt0);
 		p.add(bt1);
 		p.add(bt2);
-		p.add(bt3);//符号表
+		p.add(bt3);
 		p.add(bt4);
 		p.add(bt5);
 		return p;

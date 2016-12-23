@@ -19,9 +19,16 @@ import java.util.ArrayList;
  */
 public class LexAnalyse {
 
-	ArrayList<Word> 	wordList 		= new ArrayList<Word>();// 单词表
-	ArrayList<ConstWord>constList 		= new ArrayList<ConstWord>();// 常数表
+	ArrayList<Word> 	wordList 		= new ArrayList<Word>();//单词表
+	ArrayList<ConstWord>constList 		= new ArrayList<ConstWord>();//常数表
 	ArrayList<Error> 	errorList 		= new ArrayList<Error>();// 错误信息列表
+	
+	ArrayList<Token>	tokenList_all	= new ArrayList<Token>();//总token表不能重复
+	ArrayList<Token>	tokenList_KT	= new ArrayList<Token>();//关键字表
+	ArrayList<Token>	tokenList_PT	= new ArrayList<Token>();//界符表
+	ArrayList<Token>	tokenList_IT	= new ArrayList<Token>();//标识符表
+	ArrayList<Token>	tokenList_CT	= new ArrayList<Token>();//常量表
+	
 	int 				wordCount 		= 0;// 统计单词个数
 	int 				errorCount 		= 0;// 统计错误个数
 	boolean 			noteFlag 		= false;// 多行注释标志
@@ -244,6 +251,7 @@ public class LexAnalyse {
 					if (Word.isKey(word.value)) 
 					{
 						word.type = Word.KEY;
+						getToken(word.value,word.type);
 						if(word.value=="true"||word.value=="false")
 						{
 							constWord=new ConstWord(word.value,word.type);
@@ -258,10 +266,12 @@ public class LexAnalyse {
 					else if (isID(word.value)) 
 					{
 						word.type = Word.IDENTIFIER;
+						getToken(word.value,word.type);
 					} 
 					else 
 					{
 						word.type = Word.UNIDEF;
+						getToken(word.value,word.type);
 						word.flag = false;
 						errorCount++;
 						error = new Error(errorCount, "非法标识符", word.line, word);
@@ -301,6 +311,7 @@ public class LexAnalyse {
 					if (isInteger(word.value)) 
 					{
 						word.type = Word.INT_CONST;
+						getToken(word.value,word.type);
 						constWord=new ConstWord(word.value,word.type);
 						if(!constList.contains(constWord))
 						{
@@ -311,6 +322,7 @@ public class LexAnalyse {
 					else if(isFloat(word.value)) 
 					{
 						word.type=Word.FLOAT_CONST;
+						getToken(word.value,word.type);
 						constWord=new ConstWord(word.value,word.type);
 						if(!constList.contains(constWord))
 						{
@@ -320,6 +332,7 @@ public class LexAnalyse {
 					else
 					{
 						word.type = Word.UNIDEF;
+						getToken(word.value,word.type);
 						word.flag = false;
 						errorCount++;
 						error = new Error(errorCount, "非法标识符", word.line, word);
@@ -372,6 +385,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(beginIndex, endIndex);//去掉单引号？？但是要把单引号当作界符存入
 						word.type = Word.CHAR_CONST;
+						getToken(word.value,word.type);
 						constWord=new ConstWord(str.substring(beginIndex+1, endIndex-1),word.type);
 						if(!constList.contains(constWord))
 						{
@@ -388,6 +402,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(beginIndex, endIndex);
 						word.type = Word.UNIDEF;
+						getToken(word.value,word.type);
 						word.flag = false;
 						errorCount++;
 						error = new Error(errorCount, "非法标识符", word.line, word);
@@ -409,6 +424,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(beginIndex, endIndex);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 					} 
 					else
 					{
@@ -419,6 +435,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(index - 1, index);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 						index--;
 					}
 				}
@@ -435,6 +452,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(beginIndex, endIndex);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 						index++;
 					} 
 					else 
@@ -446,6 +464,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(index - 1, index);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 						index--;
 					}
 				} 
@@ -462,6 +481,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(beginIndex, endIndex);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 					} 
 					else 
 					{
@@ -472,6 +492,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(index - 1, index);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 						index--;
 					}
 				} 
@@ -488,6 +509,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(beginIndex, endIndex);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 					} 
 					else 
 					{
@@ -498,6 +520,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(index - 1, index);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 						index--;
 					}
 				} 
@@ -514,6 +537,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(beginIndex, endIndex);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 
 					}else if (isDigit(temp)) //正或负数，正数可以省略||temp=='-'||temp=='+'
 					{// 判断是不是int常数,float常量（指数和小数）
@@ -545,16 +569,19 @@ public class LexAnalyse {
 						if (isInteger(word.value)) 
 						{
 							word.type = Word.INT_CONST;
+							getToken(word.value,word.type);
 							constWord=new ConstWord(word.value,word.type);
 							if(!constList.contains(constWord))
 							{
 								constList.add(constWord);
+								
 							}
 							
 						} 
 						else if(isFloat(word.value)) 
 						{
 							word.type=Word.FLOAT_CONST;
+							getToken(word.value,word.type);
 							constWord=new ConstWord(word.value,word.type);
 							if(!constList.contains(constWord))
 							{
@@ -564,6 +591,7 @@ public class LexAnalyse {
 						else
 						{
 							word.type = Word.UNIDEF;
+							getToken(word.value,word.type);
 							word.flag = false;
 							errorCount++;
 							error = new Error(errorCount, "非法标识符", word.line, word);
@@ -581,6 +609,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(index - 1, index);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 						index--;
 					}
 				} 
@@ -597,6 +626,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(beginIndex, endIndex);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 					}else if (isDigit(temp)) //正或负数，正数可以省略||temp=='-'||temp=='+'
 					{// 判断是不是int常数,float常量（指数和小数）
 
@@ -627,6 +657,7 @@ public class LexAnalyse {
 						if (isInteger(word.value)) 
 						{
 							word.type = Word.INT_CONST;
+							getToken(word.value,word.type);
 							constWord=new ConstWord(word.value,word.type);
 							if(!constList.contains(constWord))
 							{
@@ -637,6 +668,7 @@ public class LexAnalyse {
 						else if(isFloat(word.value)) 
 						{
 							word.type=Word.FLOAT_CONST;
+							getToken(word.value,word.type);
 							constWord=new ConstWord(word.value,word.type);
 							if(!constList.contains(constWord))
 							{
@@ -646,6 +678,7 @@ public class LexAnalyse {
 						else
 						{
 							word.type = Word.UNIDEF;
+							getToken(word.value,word.type);
 							word.flag = false;
 							errorCount++;
 							error = new Error(errorCount, "非法标识符", word.line, word);
@@ -663,6 +696,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(index - 1, index);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 						index--;
 					}
 				}
@@ -686,6 +720,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(index - 1, index);
 						word.type = Word.OPERATOR;
+						getToken(word.value,word.type);
 					}
 					index--;
 				} 
@@ -723,12 +758,18 @@ public class LexAnalyse {
 						word.id = ++wordCount;
 						word.line = line;
 						word.value = String.valueOf(temp);
-						if (Word.isOperator(word.value))
+						if (Word.isOperator(word.value)){
 							word.type = Word.OPERATOR;
-						else if (Word.isBoundarySign(word.value))
+							getToken(word.value,word.type);
+						}
+						else if(Word.isBoundarySign(word.value)){
 							word.type = Word.BOUNDARYSIGN;
-						else
+							getToken(word.value,word.type);
+						}
+						else{
 							word.type = Word.END;
+							getToken(word.value,word.type);
+						}
 						break;
 					default:
 						word = new Word();
@@ -737,6 +778,7 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = String.valueOf(temp);
 						word.type = Word.UNIDEF;
+						getToken(word.value,word.type);
 						word.flag = false;
 						errorCount++;
 						error = new Error(errorCount, "非法标识符", word.line, word);
@@ -856,11 +898,11 @@ public class LexAnalyse {
 		PrintWriter 				pw1 	= new PrintWriter(osw1);
 		pw1.println("-----------------------------------------常量表-------------------------------------------");//测试内容
 		{
-			pw1.println("单词的值\t\t单词类型 \t\t单词是否合法\n");
+			pw1.println("单词的值\t\t单词类型 \t\t所占存储单元\n");
 			ConstWord constWord;
 			for (int i = 0; i < constList.size(); i++) {
 				constWord = constList.get(i);
-				pw1.println( constWord.value + "\t\t" + constWord.type+ "\t\t"+"true");
+				pw1.println( constWord.value + "\t\t" + constWord.type+ "\t\t"+constWord.offset);
 			}
 		}
 		pw1.println("\n------------------------------------------------------------------------------------------");//测试内容
@@ -868,11 +910,199 @@ public class LexAnalyse {
 		return path + "/synboltable.txt";
 	}
 	
-
 	public static void main(String[] args) throws IOException 
 	{
 		LexAnalyse lex = new LexAnalyse();
 		lex.lexAnalyse1("b.c");
 		lex.outputWordList();
+	}
+
+	//获得对应的token号码
+	public int getToken(String value,String type){
+		//根据string value(word.value),string type(word type)来共同决定token号码
+		Token temp=null;
+		//{//无论如何都先填总表 tokenList_all
+		//总表的tokennum不是递增的，而是按照系统设定的
+		temp=new Token(value,type);
+		tokenList_all.add(temp);
+		
+		
+		if(type=="标志符"){//填IT
+			int tokennum=tokenList_IT.size();
+			if(tokennum==0)
+			{
+				temp=new Token(tokennum+1,value,type);
+				tokenList_IT.add(temp);
+			}else{
+				temp=new Token(tokennum+1,value,type);
+				if(!tokenList_IT.contains(temp)){
+					tokenList_IT.add(temp);
+				}
+			}
+			return tokennum;
+		}else if(type=="关键字"){//填KT
+			int tokennum=tokenList_KT.size();
+			if(tokennum==0)
+			{
+				temp=new Token(tokennum+1,value,type);
+				tokenList_KT.add(temp);
+			}else{
+				temp=new Token(tokennum+1,value,type);
+				if(!tokenList_KT.contains(temp)){
+					tokenList_KT.add(temp);
+				}
+			}
+			return tokennum;
+		}else if(type=="界符"){//填PT
+			int tokennum=tokenList_PT.size();
+			if(tokennum==0)
+			{
+				temp=new Token(tokennum+1,value,type);
+				tokenList_PT.add(temp);
+			}else{
+				temp=new Token(tokennum+1,value,type);
+				if(!tokenList_PT.contains(temp)){
+					tokenList_PT.add(temp);
+				}
+			}
+			return tokennum;
+		}else if(type=="结束符"){//填PT
+			int tokennum=tokenList_PT.size();
+			if(tokennum==0)
+			{
+				temp=new Token(tokennum+1,value,type);
+				tokenList_PT.add(temp);
+			}else{
+				temp=new Token(tokennum+1,value,type);
+				if(!tokenList_PT.contains(temp)){
+					tokenList_PT.add(temp);
+				}
+			}
+			return tokennum;
+		}else if(type=="运算符"){//填PT
+			int tokennum=tokenList_PT.size();
+			if(tokennum==0)
+			{
+				temp=new Token(tokennum+1,value,type);
+				tokenList_PT.add(temp);
+			}else{
+				temp=new Token(tokennum+1,value,type);
+				if(!tokenList_PT.contains(temp)){
+					tokenList_PT.add(temp);
+				}
+			}
+			return tokennum;
+		}else if(type=="整形常量"){//填CT
+			int tokennum=tokenList_CT.size();
+			if(tokennum==0)
+			{
+				temp=new Token(tokennum+1,value,type);
+				tokenList_CT.add(temp);
+			}else{
+				temp=new Token(tokennum+1,value,type);
+				if(!tokenList_CT.contains(temp)){
+					tokenList_CT.add(temp);
+				}
+			}
+			return tokennum;
+		}/*else if(type=="字符常量"){//填CT
+			int tokennum=tokenList_CT.size();
+			if(tokennum==0)
+			{
+				temp=new Token(tokennum+1,value,type);
+				tokenList_CT.add(temp);
+			}else{
+				temp=new Token(tokennum+1,value,type);
+				if(!tokenList_CT.contains(temp)){
+					tokenList_CT.add(temp);
+				}
+			}
+			return tokennum;
+		}else if(type=="布尔常量"){//填CT
+			int tokennum=tokenList_CT.size();
+			if(tokennum==0)
+			{
+				temp=new Token(tokennum+1,value,type);
+				tokenList_CT.add(temp);
+			}else{
+				temp=new Token(tokennum+1,value,type);
+				if(!tokenList_CT.contains(temp)){
+					tokenList_CT.add(temp);
+				}
+			}
+			return tokennum;
+		}*/else if(type=="浮点常量"){//填CT
+			int tokennum=tokenList_CT.size();
+			if(tokennum==0)
+			{
+				temp=new Token(tokennum+1,value,type);
+				tokenList_CT.add(temp);
+			}else{
+				temp=new Token(tokennum+1,value,type);
+				if(!tokenList_CT.contains(temp)){
+					tokenList_CT.add(temp);
+				}
+			}
+			return tokennum;
+		}
+		return -1;//出错
+	}
+
+	//输出token
+	public String outputToken() throws IOException {
+		File file = new File("./output/");
+		if (!file.exists()) {
+			file.mkdirs();
+			file.createNewFile();// 如果这个文件不存在就创建它
+		}
+		String 					path 	= file.getAbsolutePath();
+		FileOutputStream 		fos 	= new FileOutputStream(path + "/tokenList.txt");
+		BufferedOutputStream 	bos 	= new BufferedOutputStream(fos);
+		OutputStreamWriter 		osw1 	= new OutputStreamWriter(bos, "utf-8");
+		PrintWriter 			pw1 	= new PrintWriter(osw1);
+		Token tok;
+		pw1.println("-----------------------------------------Token序列表------------------------------------------");//TK
+		pw1.println("\t\t序号\t\t单词 \t\t对应码值\n");
+		for (int i = 0; i < tokenList_all.size(); i++) {
+			tok = tokenList_all.get(i);
+			pw1.println( "\t\t"+(i+1) + "\t\t" + tok.value+ "\t\t  "+tok.i);
+			pw1.println("----------------------------------------------------------------------------------------------");
+		}
+		pw1.println("----------------------------------------------------------------------------------------------");//TK
+		
+		pw1.println("-----------------------------------------KT关键字表-------------------------------------------");//KT
+		pw1.println("\t\t\t序号\t\t单词\n");
+		for (int i = 0; i < tokenList_KT.size(); i++) {
+			tok = tokenList_KT.get(i);
+			pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
+			pw1.println("----------------------------------------------------------------------------------------------");
+		}
+		pw1.println("----------------------------------------------------------------------------------------------");//KT
+		pw1.println("-----------------------------------------PT界符号表-------------------------------------------");//PT
+		pw1.println("\t\t\t序号\t\t单词\n");
+		for (int i = 0; i < tokenList_PT.size(); i++) {
+			tok = tokenList_PT.get(i);
+			pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
+			pw1.println("----------------------------------------------------------------------------------------------");
+		}
+		pw1.println("----------------------------------------------------------------------------------------------");//PT
+		pw1.println("------------------------------------------CT常数表--------------------------------------------");//CT
+		pw1.println("\t\t\t序号\t\t单词\n");
+		for (int i = 0; i < tokenList_CT.size(); i++) {
+			tok = tokenList_CT.get(i);
+			pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
+			pw1.println("----------------------------------------------------------------------------------------------");
+		}
+		pw1.println("----------------------------------------------------------------------------------------------");//CT
+		pw1.println("-----------------------------------------IT标识符表-------------------------------------------");//IT
+		pw1.println("\t\t\t序号\t\t单词\n");
+		for (int i = 0; i < tokenList_IT.size(); i++) {
+			tok = tokenList_IT.get(i);
+			pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
+			pw1.println("----------------------------------------------------------------------------------------------");
+		}
+		pw1.println("----------------------------------------------------------------------------------------------");//IT
+		pw1.close();
+		return path + "/tokenList.txt";
 	}
 }

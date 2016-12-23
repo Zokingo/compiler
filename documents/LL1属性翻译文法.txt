@@ -1,27 +1,39 @@
 ﻿1、构造LL1属性翻译文法
 构造LL1属性翻译文法即在原有LL1文法基础上加上动作符号，并给非终结符和终结符加上一定属性，给动作符号加上语义子程序。
 对原有LL1文法改进的地方如下：
+
+
+0、声明语句(初始化)
+
+//添加一个offset栈：总的offset和自定义类型的offset
+
+X-> @INIT_XOFFSET YZ;					//@INIT_XOFFSET{设置一个总的offset==0()}
+Y-> @ASS_Y int|char|bool|float			//@ASS_Y{type=将firstWord.value压入语义栈}
+
+Z-> UZ’
+Z’-> ,Z|$ 
+U->@ASS_U id @TAB_U U’	//@ASS_U{U.VAL=id并压入语义栈} //@TAB_U{将 U.VAL 存入符号表,根据@ASS_Y获得的内容计算填入类型表相应内容，填类型表，根据类型填长度表，ADDR=offset,offset+=@ASS_Y中单词的长度) }
+U'->=K	|	$	|	[@ASS_U' num]@TAB_U';			//数组的简单声明@ASS_U'{U.VAL=num并压入语义栈}			@TAB_U'{根据语义栈中内容生成数组符号表，弹语义栈}
+K->L@EQ_K|P@EQ_K          								@EQ_K{RES=U.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}//如果U'->$则不用执行语义动作
+
+I->struct @ASS_I id{  X }I' @TAB_I ;//@ASS_I{填结构体表,I.VAL=id存入语义栈，将总的offset压入offset栈中，置offset=0;} @TAB_I{填符号表}
+
+I'->id @ASS_I1 | $				@ASS_I1{填符号表}
+
+
+
 1、	赋值：
 产生式			语义子程序
-R->@ASS_R id =L @EQ;
 -------------------------------
-R->id @ASS_R = R'//待测试
-R'->L @EQ;|P@EQ;
+R->@ASS_R id =R'       									@ASS_R{R.VAL=id并压入语义栈}
+R'->L @EQ ; | P @EQ ;									@EQ{RES=R.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}
 
-@ASS_R{R.VAL=id并压入语义栈}
-@EQ{RES=R.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}
 
-U->@ASS_U id U’ 		@ASS_U{U.VAL=id并压入语义栈}
-U’->=L|$ @EQ_U’ 	    @EQ_U’{RES=U.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}
------------------------------------------------------
-U->id @ASS_U U’			@ASS_U{U.VAL=id并压入语义栈}
-U'->=K|$|[num];			//数组的简单声明
-K->L|P @EQ_U’          @EQ_U’{RES=U.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}//如果U'->$则不用执行语义动作
-
+---------------------------------------------------------------------------------------
 
 2、	算术运算：
 产生式			语义子程序
-
+---------------------------------------------------------------------------------
 L->TL’@ADD_SUB	 		@ADD_SUB{If(OP!=null) RES= NEWTEMP; L.VAL=RES,并压入语义栈;New fourElement(OP, T.VAL;,L’VAL, RES)，}
 L’->+L@ADD				@ADD{OP=+,ARG2=L.VAL}
 L’->-L@SUB				@SUB{OP=-,ARG2=L.VAL}
@@ -30,23 +42,29 @@ T->FT’@DIV_MUL			@DIV_MUL{ if (OP !=null) RES= NEWTEMP;T.VAL=RES; new FourElem
 T’->/T@DIV				@DIV{OP=/,ARG2=T.VAL}
 T’->*T@MUL	 			@MUL{OP=*,ARG2=T.VAL}
 T’->$
-F->(L)@VOL				@VOL{F.VAL->L.VAL}
+F->(L)@TRAN_LF				@VOL{F.VAL->L.VAL}
 
 F->@ASS_F num|id		@ASS_F{F.VAL=num|id}
 
-Q->idO|$
-O->@SINGLE_OP++|--		@SINGLE_OP{OP=++|--}
+Q->id O Q'|$
+
+Q'->;|$
+
+O->@SINGLE_OP ++ | --		@SINGLE_OP{OP=++|--}
+-------------------------------------------------------------------------------------------------------------------------
 
 3、	布尔运算
 产生式			语义子程序
-
+------------------------------------------------------------------------------------------------------------------
 G->FDF@COMPARE					@COMPARE{OP=D.VAL;ARG1=F(1).VAL;ARG2=F(2).VAL,RES=NEWTEMP; New fourElement(OP,F.VAL,ARG2, RES );G.VAL=RES并压入语义栈}
 D->@COMPARE_OP<|>|==|!=|<=|>=	@COMPARE_OP{D.VAL=<|>|==|!=,并压入语栈}
+----------------------------------------------------------------------------------------------------------------------------
+
 
 4、	控制语句
 产生式			语义子程序
-B->if(G)@IF_FJ{A}@IF_BACKPATCH_FJ @IF_RJ else{A}@IF_BACKPATCH_RJ
----------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------------------------------------------------------
 B->if(E)@IF_HEAD @IF_FJ {A} @IF_BACKPATCH_FJ  B' else@IF_EL@IFEL_FJ {A} @IFEL_BACKPATCH_FJ B' @IF_END//文法加推导变换后待验证,if语句不用真跳
 B'->$|else @IF_EL@IFEL_FJ {A} @IFEL_BACKPATCH_FJ @IF_END
 
@@ -61,8 +79,6 @@ B'->$|else @IF_EL@IFEL_FJ {A} @IFEL_BACKPATCH_FJ @IF_END
 @IF_END{OP="end";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个}
 ---------------------------------------------------------------------------------
 
-@IF_RJ{OP=”RJ”;ARG1=G.VAL;RES=if_fj, New fourElement(OP,ARG1,_, RES ),将其插入到四元式列表中第i个}
-
 
 --------------------------------------------------------------------------------------------------------
 B->while @WHILE_HEAD (G) @DO @WHILE_FJ {A}@WHILE_RJ @WHILE_BACKPATCH_FJ @WHILE_END
@@ -75,9 +91,9 @@ B->while @WHILE_HEAD (G) @DO @WHILE_FJ {A}@WHILE_RJ @WHILE_BACKPATCH_FJ @WHILE_E
 @WHILE_BACKPATCH_FJ{回填前面假出口跳转四元式的跳转序号, BACKPATCH (i,wh_fj)}
 @WHILE_END{OP="we";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个}
 ----------------------------------------------------------------------------------------------------------
-B->for(YZ;G@FOR_FJ;Q){A@SINGLE}@FOR_RJ@FOR_BACKPATCH_FJ			{参照if else }
-@SINGLE	{ARG1=id;RES=NEWTEMP;New fourElement(OP,ARG1,_,RES)}
----------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------
 B->for @FOR_HEAD (YZ;@FOR_LINE_RJ G @FOR_FJ;Q){A}@FOR_RJ @SINGLE @FOR_BACKPATCH_FJ @FOR_END
 @FOR_HEAD{OP="for";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个}
 //赋值操作
@@ -88,7 +104,7 @@ B->for @FOR_HEAD (YZ;@FOR_LINE_RJ G @FOR_FJ;Q){A}@FOR_RJ @SINGLE @FOR_BACKPATCH_
 @FOR_RJ
 @SINGLE{ARG1=id;RES=NEWTEMP;New fourElement(OP,ARG1,_,RES)}
 @FOR_END{OP="fe";NEW fourElement(OP,_,_, _ ),将其插入到四元式列表中第i个}
-
+----------------------------------------------------------------------------------------------------------
 
 说明：
 (1):R.VAL表示符号R的值，VAL是R的一个属性，其它类似。

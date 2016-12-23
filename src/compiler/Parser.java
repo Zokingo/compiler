@@ -33,17 +33,27 @@ public class Parser {
 	int 					fourElemCount=0;//统计四元式个数
 	
 	//Vn
-	AnalyseNode 			S,B,A,C,X,Y,R,Z,Z1,U,U1,E,E1,H,H1,G,M,D,L,L1,T,T1,F,O,P,Q;
-	AnalyseNode				I,K,R1,B1;//新增
+	AnalyseNode 			S,B,A,C,X,Y,R,Z,Z1,U,U1,E,E1,H,H1,G,D,L,L1,T,T1,F,O,P,Q;
+	AnalyseNode				I,I1,K,R1,B1;//新增
 	
-	//语义动作
-	AnalyseNode 			ADD_SUB,DIV_MUL,ADD,SUB,DIV,MUL,ASS_F,ASS_R,ASS_Q,ASS_U,TRAN_LF;
-	AnalyseNode 			SINGLE,SINGLE_OP,EQ,EQ_U1,COMPARE,COMPARE_OP,IF_FJ,IF_RJ,IF_BACKPATCH_FJ,IF_BACKPATCH_RJ;
-	AnalyseNode 			WHILE_FJ,WHILE_RJ,WHILE_BACKPATCH_FJ,FOR_FJ,FOR_RJ,FOR_BACKPATCH_FJ;
+	//语义动作----------------------------------------------------------------------------
+	AnalyseNode				TAB_U1;//自定义数组符号表
 	
 	
 	
-	AnalyseNode 			top;//当前栈顶元素
+	
+	AnalyseNode 			ADD_SUB,DIV_MUL,ADD,SUB,DIV,MUL,SINGLE_OP;//算术运算
+	AnalyseNode				COMPARE,COMPARE_OP;//逻辑
+	AnalyseNode				ASS_F,ASS_R,ASS_Q,ASS_U,TRAN_LF,ASS_U1;//初始化(赋值)
+	AnalyseNode 			EQ,EQ_K;//赋值
+	AnalyseNode				IF_HEAD,IF_FJ,IF_BACKPATCH_FJ,IF_EL,IFEL_FJ,IFEL_BACKPATCH_FJ,IF_END;//if
+	AnalyseNode 			WHILE_HEAD,DO,WHILE_FJ,WHILE_RJ,WHILE_BACKPATCH_FJ,WHILE_END;//while
+	AnalyseNode				FOR_HEAD,FOR_LINE_RJ,FOR_FJ,FOR_RJ,SINGLE,FOR_BACKPATCH_FJ,FOR_END;//for
+	
+	//新增AnalyseNode			ASS_U1,TAB_U1,EQ_K,IF_HEAD,IF_EL,IF_END,IFEL_FJ,WHILE_HEAD,FOR_HEAD,FOR_LINE_RJ,FOR_END
+	//删除AnalyseNode			EQ_U1,IF_BACKPATCH_RJ,IF_RJ
+	//-------------------------------------------------------------------------------------
+	AnalyseNode 			top;//当前分析栈栈顶元素
 	Word 					firstWord;//待分析单词
 	
 	String 					OP=null;
@@ -102,9 +112,10 @@ public class Parser {
 		R	=new AnalyseNode(AnalyseNode.NONTERMINAL, "R", null);
 		
 		I	=new AnalyseNode(AnalyseNode.NONTERMINAL, "I", null);//新增
-		K	=new AnalyseNode(AnalyseNode.NONTERMINAL, "K", null);
-		R1	=new AnalyseNode(AnalyseNode.NONTERMINAL, "R'", null);
-		B1	=new AnalyseNode(AnalyseNode.NONTERMINAL, "B'", null);
+		I1	=new AnalyseNode(AnalyseNode.NONTERMINAL, "I1", null);//
+		K	=new AnalyseNode(AnalyseNode.NONTERMINAL, "K", null);//
+		R1	=new AnalyseNode(AnalyseNode.NONTERMINAL, "R'", null);//
+		B1	=new AnalyseNode(AnalyseNode.NONTERMINAL, "B'", null);//
 		
 		
 		ADD_SUB				=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@ADD_SUB", null);
@@ -121,13 +132,13 @@ public class Parser {
 		SINGLE				=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@SINGLE", null);
 		SINGLE_OP			=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@SINGLE_OP", null);
 		EQ					=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@EQ", null);
-		EQ_U1				=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@EQ_U'", null);
+		//EQ_U1				=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@EQ_U'", null);
 		COMPARE				=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@COMPARE", null);
 		COMPARE_OP			=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@COMPARE_OP", null);
 		IF_FJ				=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@IF_FJ", null);
-		IF_RJ				=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@IF_RJ", null);
+		//IF_RJ				=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@IF_RJ", null);
 		IF_BACKPATCH_FJ		=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@IF_BACKPATCH_FJ", null);
-		IF_BACKPATCH_RJ		=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@IF_BACKPATCH_RJ", null);
+		//IF_BACKPATCH_RJ		=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@IF_BACKPATCH_RJ", null);
 		WHILE_FJ			=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@WHILE_FJ", null);
 		WHILE_RJ			=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@WHILE_RJ", null);
 		WHILE_BACKPATCH_FJ	=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@WHILE_BACKPATCH_FJ", null);
@@ -239,6 +250,9 @@ public class Parser {
 		if(nonTerm.equals("H'"))nonTerm="4";
 		if(nonTerm.equals("L'"))nonTerm="5";
 		if(nonTerm.equals("T'"))nonTerm="6";
+		if(nonTerm.equals("I'"))nonTerm="7";//
+		if(nonTerm.equals("R'"))nonTerm="8";//
+		if(nonTerm.equals("B'"))nonTerm="9";//
 		switch(nonTerm.charAt(0)){//栈顶为非终结符处理
 		//N:S,B,A,C,,X,R,Z,Z’,U,U’,E,E’,H,H’,G,M,D,L,L’,T,T’,F,O,P,Q
 		case 'S':
@@ -260,7 +274,7 @@ public class Parser {
 				analyseStack.add(4,new AnalyseNode(AnalyseNode.TERMINAL, "{", null));
 				analyseStack.add(5,A);
 				analyseStack.add(6,new AnalyseNode(AnalyseNode.TERMINAL, "return", null));
-				analyseStack.add(7,new AnalyseNode(AnalyseNode.TERMINAL, "0", null));
+				analyseStack.add(7,F);//不是0，而是返回id|num
 				analyseStack.add(8,new AnalyseNode(AnalyseNode.TERMINAL, ";", null));
 				analyseStack.add(9,new AnalyseNode(AnalyseNode.TERMINAL, "}", null));
 			}else{
@@ -344,12 +358,12 @@ public class Parser {
 				analyseStack.add(6,A);
 				analyseStack.add(7,new AnalyseNode(AnalyseNode.TERMINAL, "}", null));
 				analyseStack.add(8,IF_BACKPATCH_FJ);
-				analyseStack.add(9,IF_RJ);
+				//analyseStack.add(9,IF_RJ);
 				analyseStack.add(10,new AnalyseNode(AnalyseNode.TERMINAL, "else", null));
 				analyseStack.add(11,new AnalyseNode(AnalyseNode.TERMINAL, "{", null));
 				analyseStack.add(12,A);
 				analyseStack.add(13,new AnalyseNode(AnalyseNode.TERMINAL, "}", null));
-				analyseStack.add(14,IF_BACKPATCH_RJ);
+				//analyseStack.add(14,IF_BACKPATCH_RJ);
 			}
 			else if(firstWord.value.equals("while")){
 				analyseStack.remove(0);
@@ -387,6 +401,7 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
+			
 		case 'C':
 			
 				analyseStack.remove(0);
@@ -395,6 +410,7 @@ public class Parser {
 				analyseStack.add(2,R);
 				;analyseStack.add(2,I);
 			break;
+			
 		case 'X':
 			if(firstWord.value.equals("int")||firstWord.value.equals("char")||firstWord.value.equals("bool")||firstWord.value.equals("float")){
 				analyseStack.remove(0);
@@ -405,6 +421,7 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
+			
 		case 'Y':
 			if(firstWord.value.equals("int")){
 				analyseStack.remove(0);
@@ -431,6 +448,7 @@ public class Parser {
 				graErrorFlag=true;
 			}
 			break;
+			
 		case 'Z'://添加P支持赋值有错
 			if(firstWord.type.equals(Word.IDENTIFIER)||firstWord.type.equals(Word.INT_CONST)||firstWord.type.equals(Word.CHAR_CONST)||
 					firstWord.type.equals(Word.BOOL_CONST)||firstWord.type.equals(Word.FLOAT_CONST)){
@@ -447,6 +465,7 @@ public class Parser {
 				graErrorFlag=true;
 			}
 			break;
+			
 		case '1'://z'
 			if(firstWord.value.equals(",")){
 				analyseStack.remove(0);
@@ -457,6 +476,7 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
+			
 		case 'U':
 			if(firstWord.type.equals(Word.IDENTIFIER)){
 				analyseStack.remove(0);
@@ -473,17 +493,19 @@ public class Parser {
 				graErrorFlag=true;
 			}
 			break;
+			
 		case '2'://U'
 			if(firstWord.value.equals("=")){
 				analyseStack.remove(0);
 				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "=", null));
 				analyseStack.add(1,L);
-				analyseStack.add(2,EQ_U1);
+				//analyseStack.add(2,EQ_U1);
 			}
 			else{			
 				analyseStack.remove(0);
 			}
 			break;
+			
 		case 'R':
 			if(firstWord.type.equals(Word.IDENTIFIER)){
 				analyseStack.remove(0);
@@ -498,30 +520,8 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
-		case 'P':
-			if(firstWord.type.equals(Word.IDENTIFIER)){
-				analyseStack.remove(0);
-				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "id", null));
-			}else if(firstWord.type.equals(Word.INT_CONST)){
-				analyseStack.remove(0);
-				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "num", null));
-			}else if(firstWord.type.equals(Word.CHAR_CONST)){
-				analyseStack.remove(0);
-				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "ch", null));
-			}
-			else if(firstWord.type.equals(Word.FLOAT_CONST)){
-				analyseStack.remove(0);
-				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "floatnum", null));
-			}
-			else{
-				errorCount++;
-				analyseStack.remove(0);
-				wordList.remove(0);
-				error=new Error(errorCount,"case P:不能输出的数据类型",firstWord.line,firstWord);
-				errorList.add(error);	
-				graErrorFlag=true;
-			}
-			break;
+			
+		
 		case 'E':
 			if(firstWord.type.equals(Word.IDENTIFIER)){
 				analyseStack.remove(0);
@@ -545,6 +545,7 @@ public class Parser {
 				graErrorFlag=true;
 			}
 			break;
+			
 		case '3'://E'
 			if(firstWord.value.equals("&&")){
 				analyseStack.remove(0);
@@ -554,6 +555,7 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
+			
 		case 'H':
 			if(firstWord.type.equals(Word.IDENTIFIER)){
 				analyseStack.remove(0);
@@ -577,6 +579,42 @@ public class Parser {
 				graErrorFlag=true;
 			}
 			break;
+			
+		case 'G':
+			if(firstWord.type.equals(Word.IDENTIFIER)){
+				analyseStack.remove(0);
+				analyseStack.add(0,F);
+				analyseStack.add(1,D);
+				analyseStack.add(2,F);
+				analyseStack.add(3,COMPARE);
+			}else if(firstWord.type.equals(Word.INT_CONST)){
+				analyseStack.remove(0);
+				analyseStack.add(0,F);
+				analyseStack.add(1,D);
+				analyseStack.add(2,F);
+				analyseStack.add(3,COMPARE);
+			}
+			else if(firstWord.value.equals("(")){
+				analyseStack.remove(0);
+				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "(", null));
+				analyseStack.add(1,E);
+				analyseStack.add(2,new AnalyseNode(AnalyseNode.TERMINAL, ")", null));
+			}
+			else if(firstWord.value.equals("!")){
+				analyseStack.remove(0);
+				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "!", null));
+				analyseStack.add(1,E);
+			}
+			else{
+				errorCount++;
+				analyseStack.remove(0);
+				wordList.remove(0);
+				error=new Error(errorCount,"case G:布尔表达式运算不能进行算术运算的数据类型或括号不匹配",firstWord.line,firstWord);
+				errorList.add(error);
+				graErrorFlag=true;
+			}
+			break;
+			
 		case '4'://H'
 			if(firstWord.value.equals("||")){
 				analyseStack.remove(0);
@@ -586,6 +624,7 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
+			
 		case 'D':
 			if(firstWord.value.equals("==")){
 				analyseStack.remove(0);
@@ -622,40 +661,8 @@ public class Parser {
 				graErrorFlag=true;
 			}
 			break;
-		case 'G':
-			if(firstWord.type.equals(Word.IDENTIFIER)){
-				analyseStack.remove(0);
-				analyseStack.add(0,F);
-				analyseStack.add(1,D);
-				analyseStack.add(2,F);
-				analyseStack.add(3,COMPARE);
-			}else if(firstWord.type.equals(Word.INT_CONST)){
-				analyseStack.remove(0);
-				analyseStack.add(0,F);
-				analyseStack.add(1,D);
-				analyseStack.add(2,F);
-				analyseStack.add(3,COMPARE);
-			}
-			else if(firstWord.value.equals("(")){
-				analyseStack.remove(0);
-				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "(", null));
-				analyseStack.add(1,E);
-				analyseStack.add(2,new AnalyseNode(AnalyseNode.TERMINAL, ")", null));
-			}
-			else if(firstWord.value.equals("!")){
-				analyseStack.remove(0);
-				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "!", null));
-				analyseStack.add(1,E);
-			}
-			else{
-				errorCount++;
-				analyseStack.remove(0);
-				wordList.remove(0);
-				error=new Error(errorCount,"case G:布尔表达式运算不能进行算术运算的数据类型或括号不匹配",firstWord.line,firstWord);
-				errorList.add(error);
-				graErrorFlag=true;
-			}
-			break;
+			
+		
 		case 'L':
 			if(firstWord.type.equals(Word.IDENTIFIER)){
 				analyseStack.remove(0);
@@ -691,7 +698,8 @@ public class Parser {
 				graErrorFlag=true;
 			}
 			break;
-		case '5'://l'
+			
+		case '5'://L'
 			if(firstWord.value.equals("+")){
 				analyseStack.remove(0);
 				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "+", null));
@@ -735,6 +743,7 @@ public class Parser {
 				graErrorFlag=true;
 			}
 			break;
+			
 		case '6'://T'
 			if(firstWord.value.equals("*")){
 				analyseStack.remove(0);
@@ -751,6 +760,7 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
+			
 		case 'F':
 			if(firstWord.type.equals(Word.IDENTIFIER)){
 				analyseStack.remove(0);
@@ -770,6 +780,7 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
+			
 		case 'O':
 			if(firstWord.value.equals("++")){
 				analyseStack.remove(0);
@@ -784,6 +795,32 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
+			
+		case 'P':
+			if(firstWord.type.equals(Word.IDENTIFIER)){
+				analyseStack.remove(0);
+				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "id", null));
+			}else if(firstWord.type.equals(Word.INT_CONST)){
+				analyseStack.remove(0);
+				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "num", null));
+			}else if(firstWord.type.equals(Word.CHAR_CONST)){
+				analyseStack.remove(0);
+				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "ch", null));
+			}
+			else if(firstWord.type.equals(Word.FLOAT_CONST)){
+				analyseStack.remove(0);
+				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "floatnum", null));
+			}
+			else{
+				errorCount++;
+				analyseStack.remove(0);
+				wordList.remove(0);
+				error=new Error(errorCount,"case P:不能输出的数据类型",firstWord.line,firstWord);
+				errorList.add(error);	
+				graErrorFlag=true;
+			}
+			break;
+			
 		case 'Q'://Q
 			if(firstWord.type.equals(Word.IDENTIFIER)){
 				analyseStack.remove(0);
@@ -794,6 +831,7 @@ public class Parser {
 				analyseStack.remove(0);
 			}
 			break;
+			
 		case 'I'://
 			if(firstWord.value.equals("struct")){
 				analyseStack.remove(0);
@@ -802,24 +840,32 @@ public class Parser {
 				analyseStack.add(2,new AnalyseNode(AnalyseNode.TERMINAL, "{", null));
 				analyseStack.add(3,A);
 				analyseStack.add(4,new AnalyseNode(AnalyseNode.TERMINAL, "}", null));
+				analyseStack.add(3,I1);//new_edit
 				analyseStack.add(5,new AnalyseNode(AnalyseNode.TERMINAL, ";", null));
 			}else{
 				analyseStack.remove(0);
 			}
 			break;
-			
-		case 'J':
-			if(firstWord.value.equals("int")||firstWord.value.equals("char")
-					||firstWord.value.equals("bool")||firstWord.value.equals("float")){
+		
+		case '7'://I'//new_added
+			if(firstWord.type.equals(Word.IDENTIFIER)){
 				analyseStack.remove(0);
+				//可以添加语义动作
 				analyseStack.add(1,new AnalyseNode(AnalyseNode.TERMINAL, "id", null));
-				analyseStack.add(2,new AnalyseNode(AnalyseNode.TERMINAL, "[", null));
-				analyseStack.add(3,new AnalyseNode(AnalyseNode.TERMINAL, "num", null));
-				analyseStack.add(4,new AnalyseNode(AnalyseNode.TERMINAL, "]", null));
-				analyseStack.add(5,new AnalyseNode(AnalyseNode.TERMINAL, ";", null));
 			}else{
 				analyseStack.remove(0);
 			}
+			break;
+			
+		case 'K'://new_added
+			
+			break;
+			
+		case '8'://R' new_added
+			
+			break;
+		case '9'://B' new_added
+			
 			break;
 		}
 	}
@@ -867,7 +913,7 @@ public class Parser {
 		else if(top.name.equals("@MUL")){
 			OP="*";
 			analyseStack.remove(0);
-		}else if(top.name.equals("@TRAN_LF")){
+		}else if(top.name.equals("@TRAN_LF")){//属性赋值语义动作
 			F.value=L.value;
 			//semanticStack.push(F.value);
 			analyseStack.remove(0);
@@ -876,7 +922,7 @@ public class Parser {
 			semanticStack.push(F.value);
 			analyseStack.remove(0);
 		}else if(top.name.equals("@ASS_R")){
-			R.value=firstWord.value;
+			R.value=firstWord.value;//让分析结点的属性值等于当前符号的属性值
 			semanticStack.push(R.value);
 			analyseStack.remove(0);
 		}else if(top.name.equals("@ASS_Q")){
@@ -910,7 +956,7 @@ public class Parser {
 			OP=null;
 			analyseStack.remove(0);
 		}
-		else if(top.name.equals("@EQ_U'")){//@EQ_U对字符常量和浮点常量赋值不支持
+		/*else if(top.name.equals("@EQ_U'")){//@EQ_U对字符常量和浮点常量赋值不支持
 			OP="=";
 			ARG1=semanticStack.pop();
 			RES=semanticStack.pop();
@@ -919,7 +965,8 @@ public class Parser {
 			fourElemList.add(fourElem);
 			OP=null;
 			analyseStack.remove(0);
-		}else if(top.name.equals("@COMPARE")){
+		}*/
+		else if(top.name.equals("@COMPARE")){
 			ARG2=semanticStack.pop();
 			OP=semanticStack.pop();
 			ARG1=semanticStack.pop();
@@ -953,7 +1000,7 @@ public class Parser {
 		}else if(top.name.equals("@IF_BACKPATCH_FJ")){
 			backpatch(if_fj.pop(), fourElemCount+2);
 			analyseStack.remove(0);
-		}else if(top.name.equals("@IF_RJ")){
+		}/*else if(top.name.equals("@IF_RJ")){
 			OP="jump";//真跳
 			//RES=(while_fj.peek()-2)+"";
 			FourElement fourElem=new FourElement(++fourElemCount,OP," "," "," ");
@@ -966,10 +1013,10 @@ public class Parser {
 				FourElement fourElem1=new FourElement(++fourElemCount,OP," "," "," ");
 				fourElemList.add(fourElem1);
 			}
-		}else if(top.name.equals("@IF_BACKPATCH_RJ")){
+		}*//*else if(top.name.equals("@IF_BACKPATCH_RJ")){
 			backpatch(if_rj.pop(), fourElemCount);
 			analyseStack.remove(0);
-		}else if(top.name.equals("@WHILE_FJ")){
+		}*/else if(top.name.equals("@WHILE_FJ")){
 			{
 				OP="do";
 				ARG1=semanticStack.lastElement();

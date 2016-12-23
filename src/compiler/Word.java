@@ -30,62 +30,71 @@ public class Word {
 	public static ArrayList<String> operator 		= new ArrayList<String>();// 运算符集合
 	
 	static {
-		Word.operator.add("+");
-		Word.operator.add("-");
-		Word.operator.add("++");
-		Word.operator.add("--");
-		Word.operator.add("*");
-		Word.operator.add("/");
-		Word.operator.add(">");
-		Word.operator.add("<");
-		Word.operator.add(">=");
-		Word.operator.add("<=");
-		Word.operator.add("==");
-		Word.operator.add("!=");
-		Word.operator.add("=");
-		Word.operator.add("&&");
-		Word.operator.add("||");
-		Word.operator.add("!");
-		//Word.operator.add(".");
-		Word.operator.add("?");
-		Word.operator.add("|");
-		Word.operator.add("&");
+		//-----------------------------------------
+		Word.key.add("main");//size();
+		Word.key.add("printf");
+		Word.key.add("scanf");
+		Word.key.add("struct");
+		Word.key.add("return");
+		Word.key.add("if");
+		Word.key.add("else");
+		Word.key.add("do");
+		Word.key.add("while");
+		Word.key.add("for");
+		Word.key.add("void");
+		Word.key.add("int");
+		Word.key.add("char");
+		Word.key.add("bool");
+		Word.key.add("float");
+		Word.key.add("true");
+		Word.key.add("false");
+		//-----------------------------------------
 		
+		Word.boundarySign.add(";");//size()+15
+		Word.boundarySign.add(",");
+		Word.boundarySign.add("[");
+		Word.boundarySign.add("]");
 		Word.boundarySign.add("(");
 		Word.boundarySign.add(")");
 		Word.boundarySign.add("{");
 		Word.boundarySign.add("}");
-		Word.boundarySign.add("[");//数组定义
-		Word.boundarySign.add("]");
-		Word.boundarySign.add(";");
-		Word.boundarySign.add(",");
-		Word.boundarySign.add("‘");//字符常量定义
-		Word.boundarySign.add("’");
-		Word.boundarySign.add("“");//字符串常量定义
-		Word.boundarySign.add("”");
+		Word.boundarySign.add("'");
+		Word.boundarySign.add("\"");
+		//-----------------------------------------
+		Word.operator.add("=");//size()+25
+		Word.operator.add("==");
+		Word.operator.add("!=");
+		Word.operator.add(">");
+		Word.operator.add("<");
+		Word.operator.add(">=");
+		Word.operator.add("<=");
+		Word.operator.add("+");
+		Word.operator.add("-");
+		Word.operator.add("*");
+		Word.operator.add("/");
+		Word.operator.add("&&");
+		Word.operator.add("||");
+		Word.operator.add("!");
+		Word.operator.add("++");
+		Word.operator.add("--");
+		Word.operator.add("?");
+		Word.operator.add("|");
+		Word.operator.add("&");
+		//Word.operator.add("#");
+		//Word.operator.add(".");
 		
 		
-		Word.key.add("void");
-		Word.key.add("main");
-		Word.key.add("int");
-		Word.key.add("char");
-		Word.key.add("if");
-		Word.key.add("else");
-		Word.key.add("while");
-		Word.key.add("for");
-		Word.key.add("printf");
-		Word.key.add("scanf");
-		Word.key.add("bool");//新增
-		Word.key.add("float");
-		Word.key.add("struct");
-		Word.key.add("true");
-		Word.key.add("false");
+		
+		
+		
+		
 	}
 	
 	int id;// 单词序号
 	String value;// 单词的值
 	String type;// 单词类型
 	int line;// 单词所在行
+	int tokennum;//token值
 	boolean flag = true;//单词是否合法
 
 	public Word() {

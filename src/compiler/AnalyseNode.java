@@ -23,30 +23,37 @@ public class AnalyseNode {
 		nonterminal.add("A");
 		nonterminal.add("B");
 		nonterminal.add("C");
-		nonterminal.add("D");
-		nonterminal.add("E");
-		nonterminal.add("F");
-		nonterminal.add("G");
-		nonterminal.add("H");
-		nonterminal.add("L");
-		nonterminal.add("M");
-		nonterminal.add("O");
-		nonterminal.add("P");
-		nonterminal.add("Q");
 		nonterminal.add("X");
 		nonterminal.add("Y");
 		nonterminal.add("Z");
-		nonterminal.add("R");
-		nonterminal.add("U");
 		nonterminal.add("Z'");
+		nonterminal.add("U");
 		nonterminal.add("U'");
+		nonterminal.add("R");
+		nonterminal.add("E");
 		nonterminal.add("E'");
+		nonterminal.add("H");
+		nonterminal.add("G");
 		nonterminal.add("H'");
+		nonterminal.add("D");
+		nonterminal.add("L");
 		nonterminal.add("L'");
 		nonterminal.add("T");
 		nonterminal.add("T'");
+		nonterminal.add("F");
+		nonterminal.add("O");
+		nonterminal.add("P");
+		nonterminal.add("Q");
 		nonterminal.add("I");//ĞÂÔö
-		nonterminal.add("J");
+		nonterminal.add("I'");//
+		nonterminal.add("K");//
+		nonterminal.add("R'");//
+		nonterminal.add("B'");//
+		
+		
+		
+		
+		
 		
 		actionSign.add("@ADD_SUB");
 		actionSign.add("@ADD");
