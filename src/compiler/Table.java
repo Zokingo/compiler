@@ -6,7 +6,8 @@ public class Table {
 	//N:S,B,A,C,,X,R,Z,Z’,U,U’,E,E’,H,H’,G,M,D,L,L’,T,T’,F,O,P,Q
 	/**
 	 * 非终结符：N:S,B,A,C,,X,R,Z,Z’,U,U’,E,E’,H,H’,G,M,D,L,L’,T,T’,F,O,P,Q
-	 * 新增 I,J
+	 * 新增 I,
+	 * 新增 K、R'、B'
 	 */
 	public final static int S=0;
 	public final static int A=1;
@@ -32,8 +33,11 @@ public class Table {
 	public final static int F=21;
 	public final static int O=22;
 	public final static int Q=23;
-	public final static int I=24;//新增
-	public final static int J=25;//新增
+	public final static int I=24;
+	public final static int I1=25;
+	public final static int K=26;//新增
+	public final static int R1=27;//新增
+	public final static int B1=28;//新增  ===>文法变换方括号运算符[]
 	 /**
 	  * 终结符：main	printf	scanf	void	int 	char	bool	id(自定义变量)	num（int常量）	ch(char常量)
 	  * if	else	while	for	;	,(	)	{	}	=	== !=	>	<	+	-	*	/	&&	||	!	++	--	#
@@ -80,12 +84,13 @@ public class Table {
 	public final static int FLOAT=36;
 	public final static int FLOATNUM=37;
 	public final static int STRUCT=38;
-	
+	public final static int RETURN=38;
 	
 	/**
 	 * 产生式PRO:S,B,A,C,,X,R,Z,Z’,U,U’,E,E’,H,H’,G,M,D,L,L’,T,T’,F,O,P,Q
 	 */
-	String [] PRO_S={"void","main","(",")","{","A","}"};
+	String [] PRO_S_void={"void","main","(",")","{","A","}"};
+	String [] PRO_S_int={"int","main","(",")","{","A","return","0",";","}"};//new_added
 	String [] PRO_S_subfunc={"Y","id","(","X",")","{","A","}"};//子函数调用//新增
 	
 	String [] PRO_X={"Y","Z"};
@@ -99,14 +104,22 @@ public class Table {
 	String [] PRO_Z1={",","Z"};
 	String [] PRO_Z1_$={"$"};
 	String [] PRO_U={"id","U1"};
-	String [] PRO_U1={"=","L"};
+	//String [] PRO_U1={"=","L"};
+	String [] PRO_U1_equal={"=","K"};//new_edit
+	String [] PRO_U1_array={"[","num","]",";"};//
 	String [] PRO_U1_$={"$"};
+	String [] PRO_K_L={"L"};//
+	String [] PRO_K_P={"P"};//
 	
-	String [] PRO_I={"struct","id","{","X","}",";"};//新增
-	String [] PRO_J={"Y","id","[","num","]",";"};//新增
+	//String [] PRO_I={"struct","id","{","X","}",";"};
+	String [] PRO_I={"struct","id","{","X","}","I1",";"};//new_edit
+	String [] PRO_I1_id={"id"};//
+	String [] PRO_I1_$={"$"};//
 	
-	
-	String [] PRO_R={"id","=","L"};
+	//String [] PRO_R={"id","=","L"};
+	String [] PRO_R_id={"id","=","R1"};//new_edit
+	String [] PRO_R_L={"L",";"};//--------------------------------------L、P的选择集合可能有交
+	String [] PRO_R_P={"P",";"};//--------------------------------------
 	
 	String [] PRO_L={"T","L1"};
 	String [] PRO_L1_add={"+","L"};
@@ -117,9 +130,8 @@ public class Table {
 	String [] PRO_T1_div={"/","T"};
 	String [] PRO_T1_$={"$"};
 	String [] PRO_F={"(","L",")"};
-	String [] PRO_F_id={"id"};//新增
-	String [] PRO_F_num={"num"};
-	String [] PRO_F_floatnum={"floatnum"};
+	String [] PRO_F_id={"id"};
+	String [] PRO_F_num={"num"};//新增
 	
 	String [] PRO_O_dadd={"++"};
 	String [] PRO_O_dsub={"--"};
@@ -140,23 +152,30 @@ public class Table {
 	String [] PRO_D_big={">"};
 	String [] PRO_D_eq={"=="};
 	String [] PRO_D_ueq={"!="};
+	String [] PRO_D_less_eq={"<="};//new_added
+	String [] PRO_D_big_eq={">="};
 	
+	//String [] PRO_B_if_else={"if","(","E",")","{","A","}","else","{","A","}"};//新增
+	String [] PRO_B_if_else={"if","(","E",")","{","A","}","B1","else","{","A","}","B1"};//new_edit
+	String [] PRO_B1_else={"{","A","}"};//
+	String [] PRO_B1_$={"$"};//
 	
-	//String [] PRO_B_if={"if","(","E",")","{","A","}"};
-	String [] PRO_B_if_else={"if","(","E",")","{","A","}","else","{","A","}"};//新增
 	String [] PRO_B_while={"while","(","E",")","{","A","}"};
 	String [] PRO_B_for={"for","(","Y","Z",";","G",";","Q",")","{","A","}"};
+	
+	
 	String [] PRO_B_printf={"printf","(","P",")",";"};
 	String [] PRO_B_scanf={"scanf","(","id",")",";"};
 	String [] PRO_P_id={"id"};
 	String [] PRO_P_ch={"ch"};
 	String [] PRO_P_num={"num"};
 	String [] PRO_P_floatnum={"floatnum"};
+	String [] PRO_P_boolid={"boolid"};//new_added
 	
 	String [] PRO_A={"C","A"};//新增
 	String [] PRO_A_$={"$"};
 	String [] PRO_C_X={"X"};
 	String [] PRO_C_B={"B"};
 	String [] PRO_C_R={"R"};
-	
+	String [] PRO_C_I={"I"};
 }

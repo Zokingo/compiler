@@ -666,7 +666,7 @@ public class LexAnalyse {
 						index--;
 					}
 				}
-				else if (temp == '/')
+				else if (temp == '/')//其它符号的处理
 				{
 					index++;
 					if (index < length && str.charAt(index) == '/')
@@ -710,10 +710,10 @@ public class LexAnalyse {
 					case '"':
 					case '.':
 					case ';':
-						// case '+':
-						// case '-':
+					// case '+':前面已经处理过的符号
+					// case '-':前面已经处理过的符号
 					case '*':
-						// case '/':
+					// case '/':前面已经处理过的符号
 					case '%':
 					case '>':
 					case '<':
@@ -756,6 +756,8 @@ public class LexAnalyse {
 				} else
 					break;
 			}
+			
+			
 			if (word == null)
 			{
 				index++;

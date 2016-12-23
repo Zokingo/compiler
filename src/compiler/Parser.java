@@ -31,11 +31,17 @@ public class Parser {
 	boolean 				graErrorFlag=false;//语法分析出错标志
 	int 					tempCount=0;//用于生成临时变量
 	int 					fourElemCount=0;//统计四元式个数
+	
+	//Vn
 	AnalyseNode 			S,B,A,C,X,Y,R,Z,Z1,U,U1,E,E1,H,H1,G,M,D,L,L1,T,T1,F,O,P,Q;
-	AnalyseNode				I,J;//新增
+	AnalyseNode				I,K,R1,B1;//新增
+	
+	//语义动作
 	AnalyseNode 			ADD_SUB,DIV_MUL,ADD,SUB,DIV,MUL,ASS_F,ASS_R,ASS_Q,ASS_U,TRAN_LF;
 	AnalyseNode 			SINGLE,SINGLE_OP,EQ,EQ_U1,COMPARE,COMPARE_OP,IF_FJ,IF_RJ,IF_BACKPATCH_FJ,IF_BACKPATCH_RJ;
 	AnalyseNode 			WHILE_FJ,WHILE_RJ,WHILE_BACKPATCH_FJ,FOR_FJ,FOR_RJ,FOR_BACKPATCH_FJ;
+	
+	
 	
 	AnalyseNode 			top;//当前栈顶元素
 	Word 					firstWord;//待分析单词
@@ -43,6 +49,8 @@ public class Parser {
 	String 					OP=null;
 	String 					ARG1,ARG2,RES;
 	Error 					error;
+	
+	
 	//int if_fj,if_rj,while_fj,while_rj,for_fj,for_rj;
 	Stack<Integer>			if_fj,if_rj,while_fj,while_rj,for_fj,for_rj;//if while for 跳转地址栈
 	Stack<String>			for_op=new Stack<String>();
@@ -50,7 +58,7 @@ public class Parser {
 	public Parser(){
 			
 		}
-//_
+//
 	//经过词法分析获得的字符流和单词
 	public Parser(LexAnalyse lexAnalyse){
 			this.lexAnalyse	=lexAnalyse;
@@ -94,7 +102,9 @@ public class Parser {
 		R	=new AnalyseNode(AnalyseNode.NONTERMINAL, "R", null);
 		
 		I	=new AnalyseNode(AnalyseNode.NONTERMINAL, "I", null);//新增
-		J	=new AnalyseNode(AnalyseNode.NONTERMINAL, "J", null);
+		K	=new AnalyseNode(AnalyseNode.NONTERMINAL, "K", null);
+		R1	=new AnalyseNode(AnalyseNode.NONTERMINAL, "R'", null);
+		B1	=new AnalyseNode(AnalyseNode.NONTERMINAL, "B'", null);
 		
 		
 		ADD_SUB				=new AnalyseNode(AnalyseNode.ACTIONSIGN, "@ADD_SUB", null);
