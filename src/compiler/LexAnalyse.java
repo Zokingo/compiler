@@ -216,19 +216,21 @@ public class LexAnalyse {
 				{// 判断是不是标志符
 					beginIndex = index;
 					index++;
-					// temp=str.charAt(index);
-					while ((index < length)
-							&& (!Word.isBoundarySign(str.substring(index,
-									index + 1)))
-							&& (!Word.isOperator(str
-									.substring(index, index + 1)))
+					//temp=str.charAt(index);
+					while ((index < length)//切割单词
+							&& (!Word.isBoundarySign(str.substring(index,index + 1)))
+							//&& (!Word.isOperator(str.substring(index, index + 1)))	//注释这段可以进行更高级的切割单词进行词法分析报错	
+							&& (!Word.isOperator(str.substring(index, index + 1)))//语法分析时因为涉及简单的单词切割因此不能注释这段
+							//&&(temp=='_'||isLetter(temp))
 							&& (str.charAt(index) != ' ')
 							&& (str.charAt(index) != '\t')
 							&& (str.charAt(index) != '\r')
 							&& (str.charAt(index) != '\n')) 
 					{
 						index++;
-						// temp=str.charAt(index);
+						/*if(index<length){
+							temp=str.charAt(index);
+						}*/
 					}
 					endIndex = index;
 					word = new Word();
@@ -513,7 +515,63 @@ public class LexAnalyse {
 						word.value = str.substring(beginIndex, endIndex);
 						word.type = Word.OPERATOR;
 
-					} 
+					}else if (isDigit(temp)) //正或负数，正数可以省略||temp=='-'||temp=='+'
+					{// 判断是不是int常数,float常量（指数和小数）
+
+						beginIndex = index;
+						index++;
+						// temp=str.charAt(index);
+						while ((index < length)
+								&& (!Word.isBoundarySign(str.substring(index,
+										index + 1)))
+								&& (!Word.isOperator(str
+										.substring(index, index + 1)))
+								&& (str.charAt(index) != ' ')
+								&& (str.charAt(index) != '\t')
+								&& (str.charAt(index) != '\r')
+								&& (str.charAt(index) != '\n')) 
+						{
+							index++;
+						}
+						endIndex = index;
+						
+						word = new Word();
+						wordCount++;
+						word.id = wordCount;
+						word.line = line;
+						word.value = str.substring(beginIndex, endIndex);
+						
+						//分析切割得到的单词
+						if (isInteger(word.value)) 
+						{
+							word.type = Word.INT_CONST;
+							constWord=new ConstWord(word.value,word.type);
+							if(!constList.contains(constWord))
+							{
+								constList.add(constWord);
+							}
+							
+						} 
+						else if(isFloat(word.value)) 
+						{
+							word.type=Word.FLOAT_CONST;
+							constWord=new ConstWord(word.value,word.type);
+							if(!constList.contains(constWord))
+							{
+								constList.add(constWord);
+							}
+						}
+						else
+						{
+							word.type = Word.UNIDEF;
+							word.flag = false;
+							errorCount++;
+							error = new Error(errorCount, "非法标识符", word.line, word);
+							errorList.add(error);
+							lexErrorFlag = true;
+						}
+						index--;
+					}  
 					else
 					{
 						// endIndex=index;
@@ -539,7 +597,63 @@ public class LexAnalyse {
 						word.line = line;
 						word.value = str.substring(beginIndex, endIndex);
 						word.type = Word.OPERATOR;
-					}
+					}else if (isDigit(temp)) //正或负数，正数可以省略||temp=='-'||temp=='+'
+					{// 判断是不是int常数,float常量（指数和小数）
+
+						beginIndex = index;
+						index++;
+						// temp=str.charAt(index);
+						while ((index < length)
+								&& (!Word.isBoundarySign(str.substring(index,
+										index + 1)))
+								&& (!Word.isOperator(str
+										.substring(index, index + 1)))
+								&& (str.charAt(index) != ' ')
+								&& (str.charAt(index) != '\t')
+								&& (str.charAt(index) != '\r')
+								&& (str.charAt(index) != '\n')) 
+						{
+							index++;
+						}
+						endIndex = index;
+						
+						word = new Word();
+						wordCount++;
+						word.id = wordCount;
+						word.line = line;
+						word.value = str.substring(beginIndex, endIndex);
+						
+						//分析切割得到的单词
+						if (isInteger(word.value)) 
+						{
+							word.type = Word.INT_CONST;
+							constWord=new ConstWord(word.value,word.type);
+							if(!constList.contains(constWord))
+							{
+								constList.add(constWord);
+							}
+							
+						} 
+						else if(isFloat(word.value)) 
+						{
+							word.type=Word.FLOAT_CONST;
+							constWord=new ConstWord(word.value,word.type);
+							if(!constList.contains(constWord))
+							{
+								constList.add(constWord);
+							}
+						}
+						else
+						{
+							word.type = Word.UNIDEF;
+							word.flag = false;
+							errorCount++;
+							error = new Error(errorCount, "非法标识符", word.line, word);
+							errorList.add(error);
+							lexErrorFlag = true;
+						}
+						index--;
+					} 
 					else 
 					{
 						// endIndex=index;
@@ -653,6 +767,7 @@ public class LexAnalyse {
 		}
 	}
 
+	//词法分析最终
 	public ArrayList<Word> lexAnalyse(String str) {
 		String buffer[];
 		buffer = str.split("\n");
@@ -668,6 +783,7 @@ public class LexAnalyse {
 		return wordList;
 	}
 
+	//词法分析测试
 	public ArrayList<Word> lexAnalyse1(String filePath) throws IOException {
 		FileInputStream 	fis 	= new FileInputStream(filePath);
 		BufferedInputStream bis 	= new BufferedInputStream(fis);
@@ -724,7 +840,7 @@ public class LexAnalyse {
 		return path + "/wordList.txt";
 	}
 	
-	//符号表输出
+	//简单常量符号表输出
 	public String outputConstList() throws IOException {
 		File file = new File("./output/");
 		if (!file.exists()) {

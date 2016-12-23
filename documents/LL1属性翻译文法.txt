@@ -1,4 +1,4 @@
-1、构造LL1属性翻译文法
+﻿1、构造LL1属性翻译文法
 构造LL1属性翻译文法即在原有LL1文法基础上加上动作符号，并给非终结符和终结符加上一定属性，给动作符号加上语义子程序。
 对原有LL1文法改进的地方如下：
 1、	赋值：
@@ -47,7 +47,9 @@ D->@COMPARE_OP<|>|==|!=|<=|>=	@COMPARE_OP{D.VAL=<|>|==|!=,并压入语栈}
 产生式			语义子程序
 B->if(G)@IF_FJ{A}@IF_BACKPATCH_FJ @IF_RJ else{A}@IF_BACKPATCH_RJ
 ---------------------------------------------------------------------------------
-B->if(E)@IF_HEAD @IF_FJ {A} @IF_BACKPATCH_FJ  [ else@IF_EL@IFEL_FJ {A} @IFEL_BACKPATCH_FJ] @IF_END//文法加推导变换后待验证,if语句不用真跳
+B->if(E)@IF_HEAD @IF_FJ {A} @IF_BACKPATCH_FJ  B' else@IF_EL@IFEL_FJ {A} @IFEL_BACKPATCH_FJ B' @IF_END//文法加推导变换后待验证,if语句不用真跳
+B'->$|else @IF_EL@IFEL_FJ {A} @IFEL_BACKPATCH_FJ @IF_END
+
 @IF_HEAD{OP="if",ARG1=G.VAL;NEW fourElement(OP,ARG1,_, _ ),将其插入到四元式列表中第i个，弹栈}
 @IF_FJ{OP=”FJ”;RES=if_fj, New fourElement(OP,_,_, RES ),将其插入到四元式列表中第i个}
 //顺序执行
