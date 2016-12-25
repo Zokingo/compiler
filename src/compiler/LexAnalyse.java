@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class LexAnalyse {
 
 	ArrayList<Word> 	wordList 		= new ArrayList<Word>();//单词表
-	ArrayList<ConstWord>constList 		= new ArrayList<ConstWord>();//常数表
+	public ArrayList<ConstWord>constList= new ArrayList<ConstWord>();//常数表
 	ArrayList<Error> 	errorList 		= new ArrayList<Error>();// 错误信息列表
 	
 	ArrayList<Token>	tokenList_all	= new ArrayList<Token>();//总token表不能重复
@@ -896,14 +896,21 @@ public class LexAnalyse {
 		BufferedOutputStream 		bos 	= new BufferedOutputStream(fos);
 		OutputStreamWriter 			osw1 	= new OutputStreamWriter(bos, "utf-8");
 		PrintWriter 				pw1 	= new PrintWriter(osw1);
-		pw1.println("-----------------------------------------常量表-------------------------------------------");//测试内容
+		pw1.println("---------------------------常量表-------------------------------------------");//测试内容
 		{
-			pw1.println("单词的值\t\t单词类型 \t\t所占存储单元\n");
 			ConstWord constWord;
-			for (int i = 0; i < constList.size(); i++) {
-				constWord = constList.get(i);
-				pw1.println( constWord.value + "\t\t" + constWord.type+ "\t\t"+constWord.offset);
+			if(constList.size()>0){
+				pw1.println("单词的值\t\t单词类型 \t\t所占存储单元\n");
+				for (int i = 0; i < constList.size(); i++) {
+					constWord = constList.get(i);
+					pw1.println( constWord.value + "\t\t" + constWord.type+ "\t\t"+constWord.offset);
+					pw1.println("------------------------------------------------------------------------------------------");
+				}
+				
+			}else{
+				pw1.println("\t\t常量表为空\n");
 			}
+			
 		}
 		pw1.println("\n------------------------------------------------------------------------------------------");//测试内容
 		pw1.close();
@@ -1062,44 +1069,64 @@ public class LexAnalyse {
 		PrintWriter 			pw1 	= new PrintWriter(osw1);
 		Token tok;
 		pw1.println("-----------------------------------------Token序列表------------------------------------------");//TK
-		pw1.println("\t\t序号\t\t单词 \t\t对应码值\n");
-		for (int i = 0; i < tokenList_all.size(); i++) {
-			tok = tokenList_all.get(i);
-			pw1.println( "\t\t"+(i+1) + "\t\t" + tok.value+ "\t\t  "+tok.i);
-			pw1.println("----------------------------------------------------------------------------------------------");
+		if(tokenList_all.size()>0){
+			pw1.println("\t\t序号\t\t单词 \t\t对应码值\n");
+			for (int i = 0; i < tokenList_all.size(); i++) {
+				tok = tokenList_all.get(i);
+				pw1.println( "\t\t"+(i+1) + "\t\t" + tok.value+ "\t\t  "+tok.i);
+				pw1.println("----------------------------------------------------------------------------------------------");
+			}
+		}else{
+			pw1.println("\t\tToken序列表为空\n");
 		}
 		pw1.println("----------------------------------------------------------------------------------------------");//TK
 		
 		pw1.println("-----------------------------------------KT关键字表-------------------------------------------");//KT
-		pw1.println("\t\t\t序号\t\t单词\n");
-		for (int i = 0; i < tokenList_KT.size(); i++) {
-			tok = tokenList_KT.get(i);
-			pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
-			pw1.println("----------------------------------------------------------------------------------------------");
+		if(tokenList_KT.size()>0){
+			pw1.println("\t\t\t序号\t\t单词\n");
+			for (int i = 0; i < tokenList_KT.size(); i++) {
+				tok = tokenList_KT.get(i);
+				pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
+				pw1.println("----------------------------------------------------------------------------------------------");
+			}
+		}else{
+			pw1.println("\t\tKT关键字表为空\n");
 		}
 		pw1.println("----------------------------------------------------------------------------------------------");//KT
 		pw1.println("-----------------------------------------PT界符号表-------------------------------------------");//PT
-		pw1.println("\t\t\t序号\t\t单词\n");
-		for (int i = 0; i < tokenList_PT.size(); i++) {
-			tok = tokenList_PT.get(i);
-			pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
-			pw1.println("----------------------------------------------------------------------------------------------");
+		if(tokenList_PT.size()>0){
+			pw1.println("\t\t\t序号\t\t单词\n");
+			for (int i = 0; i < tokenList_PT.size(); i++) {
+				tok = tokenList_PT.get(i);
+				pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
+				pw1.println("----------------------------------------------------------------------------------------------");
+			}
+		}else{
+			pw1.println("\t\tPT界符号表为空\n");
 		}
 		pw1.println("----------------------------------------------------------------------------------------------");//PT
 		pw1.println("------------------------------------------CT常数表--------------------------------------------");//CT
-		pw1.println("\t\t\t序号\t\t单词\n");
-		for (int i = 0; i < tokenList_CT.size(); i++) {
-			tok = tokenList_CT.get(i);
-			pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
-			pw1.println("----------------------------------------------------------------------------------------------");
+		if(tokenList_CT.size()>0){
+			pw1.println("\t\t\t序号\t\t单词\n");
+			for (int i = 0; i < tokenList_CT.size(); i++) {
+				tok = tokenList_CT.get(i);
+				pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
+				pw1.println("----------------------------------------------------------------------------------------------");
+			}
+			}else{
+			pw1.println("\t\tCT常数表为空\n");
 		}
 		pw1.println("----------------------------------------------------------------------------------------------");//CT
 		pw1.println("-----------------------------------------IT标识符表-------------------------------------------");//IT
-		pw1.println("\t\t\t序号\t\t单词\n");
-		for (int i = 0; i < tokenList_IT.size(); i++) {
-			tok = tokenList_IT.get(i);
-			pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
-			pw1.println("----------------------------------------------------------------------------------------------");
+		if(tokenList_IT.size()>0){
+			pw1.println("\t\t\t序号\t\t单词\n");
+			for (int i = 0; i < tokenList_IT.size(); i++) {
+				tok = tokenList_IT.get(i);
+				pw1.println( "\t\t\t"+(i+1) + "\t\t" + tok.value);
+				pw1.println("----------------------------------------------------------------------------------------------");
+			}
+		}else{
+			pw1.println("\t\tIT标识符表为空\n");
 		}
 		pw1.println("----------------------------------------------------------------------------------------------");//IT
 		pw1.close();

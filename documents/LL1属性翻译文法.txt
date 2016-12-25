@@ -7,26 +7,24 @@
 
 //添加一个offset栈：总的offset和自定义类型的offset
 
-X-> @INIT_XOFFSET YZ;					//@INIT_XOFFSET{设置一个总的offset==0()}
+X->  YZ;@INIT_XOFFSET		//@INIT_XOFFSET{设置一个总的offset==0()}
 Y-> @ASS_Y int|char|bool|float			//@ASS_Y{type=将firstWord.value压入语义栈}
 
 Z-> UZ’
-Z’-> ,Z|$ 
+Z’-> ,@ASS_Y Z|$ 
 U->@ASS_U id @TAB_U U’	//@ASS_U{U.VAL=id并压入语义栈} //@TAB_U{将 U.VAL 存入符号表,根据@ASS_Y获得的内容计算填入类型表相应内容，填类型表，根据类型填长度表，ADDR=offset,offset+=@ASS_Y中单词的长度) }
-U'->=K	|	$	|	[@ASS_U' num]@TAB_U';			//数组的简单声明@ASS_U'{U.VAL=num并压入语义栈}			@TAB_U'{根据语义栈中内容生成数组符号表，弹语义栈}
-K->L@EQ_K|P@EQ_K          								@EQ_K{RES=U.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}//如果U'->$则不用执行语义动作
+U'->=L	@EQ|$|[@ASS_U' num]@TAB_U'			//数组的简单声明@ASS_U'{U.VAL=num并压入语义栈}			@TAB_U'{根据语义栈中内容生成数组符号表，弹语义栈}
+         								@EQ{RES=U.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}//如果U'->$则不用执行语义动作
 
-I->struct @ASS_I id{  X }I' @TAB_I ;//@ASS_I{填结构体表,I.VAL=id存入语义栈，将总的offset压入offset栈中，置offset=0;} @TAB_I{填符号表}
-
-I'->id @ASS_I1 | $				@ASS_I1{填符号表}
+I->struct @ASS_I id{  A } @TAB_I;//@ASS_I{填结构体表,I.VAL=id存入语义栈，将总的offset压入offset栈中，置offset=0;} @TAB_I{填符号表}
 
 
 
 1、	赋值：
 产生式			语义子程序
 -------------------------------
-R->@ASS_R id =R'       									@ASS_R{R.VAL=id并压入语义栈}
-R'->L @EQ ; | P @EQ ;									@EQ{RES=R.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}
+R->@ASS_R id =L;       									@ASS_R{R.VAL=id并压入语义栈}
+														@EQ{RES=R.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}
 
 
 ---------------------------------------------------------------------------------------
@@ -46,10 +44,7 @@ F->(L)@TRAN_LF				@VOL{F.VAL->L.VAL}
 
 F->@ASS_F num|id		@ASS_F{F.VAL=num|id}
 
-Q->id O Q'|$
-
-Q'->;|$
-
+Q->id O|$
 O->@SINGLE_OP ++ | --		@SINGLE_OP{OP=++|--}
 -------------------------------------------------------------------------------------------------------------------------
 

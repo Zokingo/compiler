@@ -18,7 +18,6 @@ public class AnalyseNode {
 	static ArrayList<String>nonterminal	=new ArrayList<String>();//非终结符集合
 	static ArrayList<String>actionSign	=new ArrayList<String>();//动作符集合
 	static{
-		//N:S,B,A,C,,X,R,Z,Z’,U,U’,E,E’,H,H’,G,M,D,L,L’,T,T’,F,O,P,Q
 		nonterminal.add("S");
 		nonterminal.add("A");
 		nonterminal.add("B");
@@ -44,48 +43,73 @@ public class AnalyseNode {
 		nonterminal.add("O");
 		nonterminal.add("P");
 		nonterminal.add("Q");
+		nonterminal.add("Q'");//新增
 		nonterminal.add("I");//新增
 		nonterminal.add("I'");//
 		nonterminal.add("K");//
 		nonterminal.add("R'");//
 		nonterminal.add("B'");//
-		
-		
-		
-		
-		
-		
+//----------------------------------------------
+		//符号表项生成相关语义动作(作用在标识符声明时)
+		actionSign.add("@TAB_S");
+		actionSign.add("@TAB_U");
+		actionSign.add("@TAB_U'");
+		actionSign.add("@INIT_XOFFSET");
+		actionSign.add("@ASS_Y");
+		actionSign.add("@ASS_I");
+		actionSign.add("@TAB_I");
+		actionSign.add("@ASS_I'");
+		//算术运算语义动作
 		actionSign.add("@ADD_SUB");
+		actionSign.add("@DIV_MUL");
 		actionSign.add("@ADD");
 		actionSign.add("@SUB");
-		actionSign.add("@DIV_MUL");
 		actionSign.add("@DIV");
 		actionSign.add("@MUL");
-		actionSign.add("@SINGLE");
-		actionSign.add("@SINGTLE_OP");
-		actionSign.add("@ASS_R");
-		actionSign.add("@ASS_Q");
-		actionSign.add("@ASS_F");
-		actionSign.add("@ASS_U");
-		actionSign.add("@TRAN_LF");
-		actionSign.add("@EQ");
-		actionSign.add("@EQ_U'");
+		actionSign.add("@SINGLE_OP");
+		//逻辑操作语义动作
 		actionSign.add("@COMPARE");
 		actionSign.add("@COMPARE_OP");
+		//初始化(赋值)语义动作
+		actionSign.add("@ASS_F");
+		actionSign.add("@ASS_R");
+		actionSign.add("@ASS_Q");
+		actionSign.add("@ASS_U");
+		actionSign.add("@TRAN_LF");
+		actionSign.add("@ASS_U'");
+		//赋值语义动作
+		actionSign.add("@EQ");
+		actionSign.add("@EQ_K");
+		//actionSign.add("@EQ_U'");
+		//if语句语义动作
+		actionSign.add("@IF_HEAD");
 		actionSign.add("@IF_FJ");
+		//actionSign.add("@IF_RJ");
 		actionSign.add("@IF_BACKPATCH_FJ");
-		actionSign.add("@IF_RJ");
-		actionSign.add("@IF_BACKPATCH_RJ");
+		actionSign.add("@IF_EL");
+		actionSign.add("@IFEL_FJ");
+		actionSign.add("@IFEL_BACKPATCH_FJ");
+		actionSign.add("@IF_END");
+		//actionSign.add("@IF_BACKPATCH_RJ");
+		//while语句语义动作
+		actionSign.add("@WHILE_HEAD");
+		actionSign.add("@DO");
 		actionSign.add("@WHILE_FJ");
+		actionSign.add("@WHILE_RJ");
 		actionSign.add("@WHILE_BACKPATCH_FJ");
-		actionSign.add("@IF_RJ");
+		actionSign.add("@WHILE_END");
+		//for语句语义动作
+		actionSign.add("@FOR_HEAD");
+		actionSign.add("@FOR_LINE_RJ");
 		actionSign.add("@FOR_FJ");
 		actionSign.add("@FOR_RJ");
+		actionSign.add("@SINGLE");
 		actionSign.add("@FOR_BACKPATCH_FJ");
+		actionSign.add("@FOR_END");
 	}
 	
 	String type;//节点类型(终结符、非终结符、动作符、结束符)
-	String name;//节点名(S、A、B等)
+	String name;//节点名(S、A、B,@开头的动作符号等)//
 	String value;//节点值(对应wordList中的单词)
 	
 	//非终结符

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+//import java.awt.Font;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -56,6 +57,7 @@ public class InfoFrame extends JFrame {
 		text = new TextArea();
 		//msg.setBackground(Color.green);
 		text.setForeground(Color.BLUE);
+		//text.setFont(new Font("",Font.PLAIN,32));
 		pane.add(BorderLayout.CENTER, text);
 		return pane;
 	}

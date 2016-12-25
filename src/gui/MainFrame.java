@@ -29,6 +29,9 @@ public class MainFrame extends JFrame {
 	String 		synbolTablePath;
 	String 		TokenTablePath;
 	String 		fourElementPath;
+	String 		TablePath;
+	
+	
 	LexAnalyse 	lexAnalyse;
 	
 	Parser parser;
@@ -89,6 +92,7 @@ public class MainFrame extends JFrame {
 		JPanel p = new JPanel(new BorderLayout());
 		JLabel label = new JLabel("源文件如下：");
 		sourseFile = new TextArea();
+		//sourseFile.setFont(new Font("楷体",Font.BOLD,32));
 		sourseFile.setText("");
 		p.add(BorderLayout.NORTH, label);
 		p.add(BorderLayout.CENTER, sourseFile);
@@ -179,15 +183,23 @@ public class MainFrame extends JFrame {
 				try {
 					lexAnalyse=new LexAnalyse(sourseFile.getText());
 					synbolTablePath = lexAnalyse.outputConstList();
+					parser=new Parser(lexAnalyse);
+					parser.grammerAnalyse();
+					TablePath=parser.outputTable();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				Toolkit toolkit = Toolkit.getDefaultToolkit();
 				Dimension screen = toolkit.getScreenSize();
-				InfoFrame inf = new InfoFrame("符号表生成", synbolTablePath);
-				inf.setSize(750,480);
+				InfoFrame inf = new InfoFrame("类型表", TablePath);
+				inf.setSize(400,900);
 				inf.setLocation(screen.width / 2 - inf.getWidth() / 2, screen.height
+						/ 2 - inf.getHeight() / 2);
+				inf.setVisible(true);
+				inf = new InfoFrame("常量表", synbolTablePath);
+				inf.setSize(400,900);
+				inf.setLocation(screen.width / 2+ inf.getWidth() / 2, screen.height
 						/ 2 - inf.getHeight() / 2);
 				inf.setVisible(true);
 			}
@@ -233,6 +245,8 @@ public class MainFrame extends JFrame {
 				inf.setVisible(true);
 			}
 		});
+		
+		
 		p.add(bt0);
 		p.add(bt1);
 		p.add(bt2);

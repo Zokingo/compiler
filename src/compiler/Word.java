@@ -49,7 +49,6 @@ public class Word {
 		Word.key.add("true");
 		Word.key.add("false");
 		//-----------------------------------------
-		
 		Word.boundarySign.add(";");//size()+15
 		Word.boundarySign.add(",");
 		Word.boundarySign.add("[");
@@ -82,19 +81,13 @@ public class Word {
 		Word.operator.add("&");
 		//Word.operator.add("#");
 		//Word.operator.add(".");
-		
-		
-		
-		
-		
-		
 	}
 	
-	int id;// 单词序号
-	String value;// 单词的值
-	String type;// 单词类型
-	int line;// 单词所在行
-	int tokennum;//token值
+	int id;				// 单词序号
+	String value;		// 单词的值
+	String type;		// 单词类型
+	int line;			// 单词所在行
+	int tokennum;		// 单词token值
 	boolean flag = true;//单词是否合法
 
 	public Word() {

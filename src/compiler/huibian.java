@@ -38,58 +38,51 @@ public class huibian extends JFrame {
 			String temp2="1 example   SEGMENT\n2 ASSUME CS:example,DS:example\n";
 			text.append(temp2);
 			int i;
-			for( i = 2; i < str.length; i++)
+			int j=2;
+			for( i = 2; i < str.length; i++,j++)
 			{
 				
 				String temp[] = str[i].split(",");
 				//让行号加2
 				if(temp[0].charAt(temp[0].length() -1) == '='){
-					String temp1 = (i+1) + " MOV " + temp[3].substring(0,temp[3].length() - 1) + "," + temp[1] + "\n";
+					String temp1=(j+1)+"  MOV  "+"AX,"+temp[1] + "\n";
 					text.append(temp1);
-				}
-				else if(temp[0].charAt(temp[0].length() -1) == '+' && temp[0].charAt(temp[0].length() -2) == '+'){
-					String temp1 = (i+1) + " INC "  + temp[1] + "\n";
+					temp1 = (j+1) + "  MOV  " + temp[3].substring(0,temp[3].length() - 1) + ",AX" +"\n";
 					text.append(temp1);
-				}
-				else if(temp[0].charAt(temp[0].length() -1) == '+'){
-					String temp1 = (i+1) + " ADD " + temp[3].substring(0,temp[3].length() - 1) + "," + temp[1] + "\n";
+				}else if(temp[0].charAt(temp[0].length() -1) == '+' && temp[0].charAt(temp[0].length() -2) == '+'){
+					String temp1 = (j+1) + " INC "  + temp[1] + "\n";
 					text.append(temp1);
-				}
-				else if(temp[0].charAt(temp[0].length() -1) == '-'){
-					String temp1 = (i+1) + " SUB " + temp[3].substring(0,temp[3].length() - 1) + "," + temp[1] + "\n";
+				}else if(temp[0].charAt(temp[0].length() -1) == '+'){
+					String temp1 = (j+1) + " ADD " + temp[3].substring(0,temp[3].length() - 1) + "," + temp[1] + "\n";
 					text.append(temp1);
-				}
-				else if(temp[0].charAt(temp[0].length() -1) == '*'){
-					String temp1 = (i+1) + " MUL " + temp[3].substring(0,temp[3].length() - 1) + "," + temp[1] + "\n";
+				}else if(temp[0].charAt(temp[0].length() -1) == '-'){
+					String temp1 = (j+1) + " SUB " + temp[3].substring(0,temp[3].length() - 1) + "," + temp[1] + "\n";
 					text.append(temp1);
-				}
-				else if(temp[0].charAt(temp[0].length() -1) == '/'){
-					String temp1 = (i+1) + " DIV "  + temp[3].substring(0,temp[3].length() - 1) + "," + temp[1] + "\n";
+				}else if(temp[0].charAt(temp[0].length() -1) == '*'){
+					String temp1 = (j+1) + " MUL " + temp[3].substring(0,temp[3].length() - 1) + "," + temp[1] + "\n";
 					text.append(temp1);
-				}
-				else if(temp[0].charAt(temp[0].length() -1) == 'J' && temp[0].charAt(temp[0].length() -2) == 'R'){
-					String temp1 = (i+1) + " JMP " + temp[3].substring(0,temp[3].length() - 1)  + "\n";
+				}else if(temp[0].charAt(temp[0].length() -1) == '/'){
+					String temp1 = (j+1) + " DIV "  + temp[3].substring(0,temp[3].length() - 1) + "," + temp[1] + "\n";
 					text.append(temp1);
-				}
-				else if(temp[0].charAt(temp[0].length() -1) == 'J' && temp[0].charAt(temp[0].length() -2) == 'F'){
-					String temp1 = (i+1) + " JZ " + temp[3].substring(0,temp[3].length() - 1)  + "\n";
+				}else if(temp[0].charAt(temp[0].length() -1) == 'J' && temp[0].charAt(temp[0].length() -2) == 'R'){
+					String temp1 = (j+1) + " JMP " + temp[3].substring(0,temp[3].length() - 1)  + "\n";
 					text.append(temp1);
-				}
-				else if(temp[0].charAt(temp[0].length() -1) == '>'){
-					String temp1 = (i+1) + " JG " + temp[3].substring(0,temp[3].length() - 1)  + "\n";
+				}else if(temp[0].charAt(temp[0].length() -1) == 'J' && temp[0].charAt(temp[0].length() -2) == 'F'){
+					String temp1 = (j+1) + " JZ " + temp[3].substring(0,temp[3].length() - 1)  + "\n";
 					text.append(temp1);
-				}
-				else if(temp[0].charAt(temp[0].length() -1) == '<'){
-					String temp1 = (i+1) + " JL " + temp[3].substring(0,temp[3].length() - 1)  + "\n";
+				}else if(temp[0].charAt(temp[0].length() -1) == '>'){
+					String temp1 = (j+1) + " JG " + temp[3].substring(0,temp[3].length() - 1)  + "\n";
 					text.append(temp1);
-				}
-				else{
-					String temp1 = (i+1) +"未知四元式处理：后续待添加\n";
+				}else if(temp[0].charAt(temp[0].length() -1) == '<'){
+					String temp1 = (j+1) + " JL " + temp[3].substring(0,temp[3].length() - 1)  + "\n";
+					text.append(temp1);
+				}else{
+					String temp1 = (j+1) +"未知四元式处理：后续待添加"+"\n";
 					text.append(temp1);
 				}
 			}
-			i=i+1;
-			String temp3=i+" INT   21H\n"+(i+1)+" RET\n"+(i+2)+" example ENDS\n";
+			j=j+1;
+			String temp3=j+" INT   21H\n"+(j+1)+" RET\n"+(j+2)+" example ENDS\n";
 			text.append(temp3);
 			
 		} catch (IOException e) {
@@ -111,6 +104,7 @@ public class huibian extends JFrame {
 		JPanel pane = new JPanel(new BorderLayout());
 		text = new TextArea();
 		text.setForeground(Color.BLUE);
+		//text.setFont(new Font("宋体",Font.PLAIN,32));
 		pane.add(BorderLayout.CENTER, text);
 		return pane;
 	}
