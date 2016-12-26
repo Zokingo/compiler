@@ -11,9 +11,14 @@ X->  YZ;@INIT_XOFFSET		//@INIT_XOFFSET{设置一个总的offset==0()}
 Y-> @ASS_Y int|char|bool|float			//@ASS_Y{type=将firstWord.value压入语义栈}
 
 Z-> UZ’
-Z’-> ,@ASS_Y Z|$ 
-U->@ASS_U id @TAB_U U’	//@ASS_U{U.VAL=id并压入语义栈} //@TAB_U{将 U.VAL 存入符号表,根据@ASS_Y获得的内容计算填入类型表相应内容，填类型表，根据类型填长度表，ADDR=offset,offset+=@ASS_Y中单词的长度) }
-U'->=L	@EQ|$|[@ASS_U' num]@TAB_U'			//数组的简单声明@ASS_U'{U.VAL=num并压入语义栈}			@TAB_U'{根据语义栈中内容生成数组符号表，弹语义栈}
+Z’-> ,@ASS_Y Z|$ |[@ASS_U'@TAB_U num]U'@TAB_U'
+
+//@TAB_U{arrayFlag=true开始定义多维数组}
+//@TAB_U'{arrayFlag=false 数组定义完毕}@TAB_U'{根据语义栈中内容生成数组符号表，弹语义栈}
+//数组的简单声明@ASS_U'{U.VAL=num并压入语义栈}
+
+U->@ASS_U id  U’	//@ASS_U{U.VAL=id并压入语义栈} //
+U'->=L	@EQ|$|[@ASS_U' num]						
          								@EQ{RES=U.VAL,OP=’=’,ARG1=L.VAL,new fourElement(OP,ARG1,_, RES)}//如果U'->$则不用执行语义动作
 
 I->struct @ASS_I id{  A } @TAB_I;//@ASS_I{填结构体表,I.VAL=id存入语义栈，将总的offset压入offset栈中，置offset=0;} @TAB_I{填符号表}

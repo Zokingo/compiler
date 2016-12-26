@@ -1,3 +1,4 @@
+//各种语句综合使用案例
 void main()
 {
   int sum=0;

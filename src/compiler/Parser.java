@@ -32,7 +32,10 @@ public class Parser {
 	ArrayList<lengthNode> 	lengthTable		=new ArrayList<lengthNode>();//长度表
 	int 					Totaloff		=0;//系统区距
 	boolean 				structFlag		=false;//结构体定义@ASS_I=true开始标识符,为真开始定义@TAB_I时=false
-
+	int 					structNum		=0;//定义的结构体数
+	boolean					arrayFlag		=false;//数组定义@ASS_U'开始定义数组,为真开始定义@TAB_U'时=false结束数组定义
+	String					arrayType;//数组最小单元的类型//在@ASS_U'时初始化保存下来,在@TAB_U'时复原
+	int						arrayNum		=0;//定义的数组数
 	
 	StringBuffer 			bf;//分析栈缓冲流
 	int 					errorCount		=0;//统计错误个数
@@ -337,7 +340,7 @@ public class Parser {
 				analyseStack.remove(0);
 				analyseStack.add(0,C);
 				analyseStack.add(1,A);
-			}else if(firstWord.type.equals("struct")){
+			}else if(firstWord.value.equals("struct")){
 				analyseStack.remove(0);
 				analyseStack.add(0,C);
 				analyseStack.add(1,A);
@@ -359,7 +362,6 @@ public class Parser {
 				analyseStack.add(3,new AnalyseNode(AnalyseNode.TERMINAL, ")", null));
 				analyseStack.add(4,new AnalyseNode(AnalyseNode.TERMINAL, ";", null));
 				analyseStack.add(5,A);
-				
 			}
 			else if(firstWord.value.equals("scanf")){
 				analyseStack.remove(0);
@@ -372,7 +374,6 @@ public class Parser {
 			}
 			else if(firstWord.value.equals("if")){
 				analyseStack.remove(0);
-				
 				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "if", null));
 				analyseStack.add(1,new AnalyseNode(AnalyseNode.TERMINAL, "(", null));
 				analyseStack.add(2,G);
@@ -408,7 +409,6 @@ public class Parser {
 			}
 			else if(firstWord.value.equals("for")){
 				analyseStack.remove(0);
-				
 				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "for", null));
 				analyseStack.add(1,FOR_HEAD);
 				analyseStack.add(2,new AnalyseNode(AnalyseNode.TERMINAL, "(", null));
@@ -503,6 +503,15 @@ public class Parser {
 				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, ",", null));
 				semanticStack.push(synbolTable.get(synbolTable.size()-1).type);//类型和符号表最后一个的类型一样，因此将它取出来再压入语义栈中即可
 				analyseStack.add(1,Z);
+			}else if(firstWord.value.equals("[")){
+				analyseStack.remove(0);
+				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "[", null));
+				analyseStack.add(1,ASS_U1);
+				analyseStack.add(2,TAB_U);//开始定义多维数组
+				analyseStack.add(3,new AnalyseNode(AnalyseNode.TERMINAL, "num", null));
+				analyseStack.add(4,new AnalyseNode(AnalyseNode.TERMINAL, "]", null));
+				analyseStack.add(5,U1);//进行多维数组定义
+				analyseStack.add(6,TAB_U1);//多维数组定义完
 			}else{
 				analyseStack.remove(0);
 			}
@@ -513,9 +522,7 @@ public class Parser {
 				analyseStack.remove(0);
 				analyseStack.add(0,ASS_U);
 				analyseStack.add(1,new AnalyseNode(AnalyseNode.TERMINAL, "id", null));
-				
 				analyseStack.add(2,U1);
-				analyseStack.add(3,TAB_U);
 			}else{
 				errorCount++;
 				analyseStack.remove(0);
@@ -538,7 +545,7 @@ public class Parser {
 				analyseStack.add(1,ASS_U1);
 				analyseStack.add(2,new AnalyseNode(AnalyseNode.TERMINAL, "num", null));
 				analyseStack.add(3,new AnalyseNode(AnalyseNode.TERMINAL, "]", null));
-				analyseStack.add(4,TAB_U1);
+				//analyseStack.add(4,TAB_U1);
 			}else{			
 				analyseStack.remove(0);
 			}
@@ -900,11 +907,12 @@ public class Parser {
 			pfinfTable.add(pf);
 		}else if(top.name.equals("@TAB_U")){
 			analyseStack.remove(0);
+			arrayFlag=true;//说明开始定义多维数组
 		}else if(top.name.equals("@TAB_U'")){
 			analyseStack.remove(0);
+			arrayFlag=false;//说明定义完了数组
 		}else if(top.name.equals("@INIT_XOFFSET")){
 			analyseStack.remove(0);
-			
 		}else if(top.name.equals("@ASS_Y")){
 			analyseStack.remove(0);
 			String temp_y=analyseStack.firstElement().name;
@@ -953,23 +961,27 @@ public class Parser {
 			analyseStack.remove(0);
 			String res=firstWord.value;
 			typeNode tn2 =new typeNode("结构体");
+			structNum++;
+			tn2.index=structNum;
+			
 			if(typeTable.size()==0){
 				typeTable.add(tn2);
 			}else if(!typeTable.contains(tn2)){
 				typeTable.add(tn2);
 			}
+			
 			SynbolNode sn2=new SynbolNode(res,tn2.type,Totaloff);
+			sn2.setIndex(structNum);
 			sn2.setCat("变量");
+			
 			synbolTable.add(sn2);
 			structFlag=true;
 			rinfNode rinfnode=new rinfNode(res);
+			rinfnode.setIndex(structNum);
 			rinfTable.add(rinfnode);
-			
-			
 		}else if(top.name.equals("@TAB_I")){
 			analyseStack.remove(0);
 			structFlag=false;
-			
 		}//算术运算语义动作
 		else if(top.name.equals("@ADD_SUB")){
 			if(OP!=null&&(OP.equals("+")||OP.equals("-"))){
@@ -1084,8 +1096,6 @@ public class Parser {
 						}
 					}
 				}
-				
-				
 			}
 			semanticStack.push(U.value);
 			analyseStack.remove(0);
@@ -1093,23 +1103,53 @@ public class Parser {
 			F.value=L.value;
 			//semanticStack.push(F.value);
 			analyseStack.remove(0);
-		}else if(top.name.equals("@ASS_U'")){
+		}else if(top.name.equals("@ASS_U'")){//填数组表项、填
 			analyseStack.remove(0);
-			String res=firstWord.value;
-			SynbolNode snode1=synbolTable.get(synbolTable.size()-1);
-			int up=Integer.parseInt(res);
-			ainfNode an=new ainfNode(up,snode1);
-			ainfTable.add(an);
-			typeNode tn1=new typeNode("数组");
+			typeNode tn1=new typeNode("数组");//类型结点
+			arrayNum++;
+			tn1.setIndex(arrayNum);
+			
 			if(typeTable.size()==0){
 				typeTable.add(tn1);
 			}else if(!typeTable.contains(tn1)){
 				typeTable.add(tn1);//tn2
 			}
-			tn1.setlengthoff((up-1)*snode1.typenode.lengthoff);
-			synbolTable.get(synbolTable.size()-1).setTypenode(tn1);
-			Totaloff+=synbolTable.get(synbolTable.size()-1).lengthoff;
+			//获取刚刚填到标识符表的数组标识名:类型信息
+			SynbolNode snode1=synbolTable.get(synbolTable.size()-1);
 			
+			String res=firstWord.value;//得到数组下标
+			int up=Integer.parseInt(res);
+			ainfNode an_temp=new ainfNode();
+			
+			if(snode1.type=="数组"){//说明定义的不是第一维,数组表肯定不为空,要修改上一维数数组结点的类型信息,成分类型以及,成分长度
+				ainfNode an=new ainfNode(up,new SynbolNode(snode1.value,arrayType,Totaloff));//按照第一维的值单元初始化数组结点
+				an_temp=an;
+				for(int i=ainfTable.size()-1;i>=0;i--){
+					if(ainfTable.get(i).equals(an)){
+						ainfTable.get(i).setPreDiemension("数组", 1, an_temp.offsize);
+						an_temp=ainfTable.get(i);
+					}else{
+						break;
+					}
+				}
+				ainfTable.add(an);
+				int oldlength=tn1.lengthoff;
+				Totaloff-=synbolTable.get(synbolTable.size()-1).lengthoff;//Totaloff减去原先第一维的长度Totaloff-=synbolTable.get(ainCount).lengthoff;//Totaloff减去原先第一维的长度
+				tn1.setlengthoff(an_temp.offsize-oldlength);
+				synbolTable.get(synbolTable.size()-1).setTypenode(tn1);
+				synbolTable.get(synbolTable.size()-1).setIndex(arrayNum);
+				Totaloff=synbolTable.get(synbolTable.size()-1).offset+synbolTable.get(synbolTable.size()-1).lengthoff-oldlength;
+			}else{
+				arrayType=snode1.type;//第一维
+				ainfNode an=new ainfNode(up,snode1);
+				ainfTable.add(an);
+				//
+				int oldlength=tn1.lengthoff;
+				tn1.setlengthoff(an.offsize-oldlength);
+				synbolTable.get(synbolTable.size()-1).setTypenode(tn1);
+				//synbolTable.get(synbolTable.size()-1).setIndex(arrayNum);
+				Totaloff=synbolTable.get(synbolTable.size()-1).offset+synbolTable.get(synbolTable.size()-1).lengthoff-oldlength;
+			}
 			semanticStack.pop();
 		}//赋值语义动作
 		else if(top.name.equals("@EQ")){
@@ -1269,7 +1309,6 @@ public class Parser {
 	}
 	
 	//输出LL1分析过程表
-
 	public String outputLL1() throws IOException{
 		//grammerAnalyse();
 		File file=new File("./output/");
@@ -1329,7 +1368,7 @@ public class Parser {
 		return path+"/FourElement1.txt";
 	}
 	
-	
+	//得到四元式
 	public String outputFourElem() throws IOException{
 		
 		File file=new File("./output/");
@@ -1390,7 +1429,7 @@ public class Parser {
 			pw1.println("序号\t\t类型名\t\t类型指针\n");//int=0
 			for (int i = 0; i < typeTable.size(); i++) {
 				tab = typeTable.get(i);
-				pw1.println((i+1) + "\t\t"+tab.type+"\t\t" + tab.tpoint);
+				pw1.println((i+1) + "\t\t"+tab.type+tab.index+"\t\t" + tab.tpoint);
 				pw1.println("----------------------------------------------------------------------------------------------");
 			}
 		}else{
@@ -1404,7 +1443,7 @@ public class Parser {
 			pw1.println("序号\t标识符名\t类型指针\t种类\t地址\t所占内存单元:字节\n");//int=0//+tab2.type
 			for (int i = 0; i < synbolTable.size(); i++) {
 				tab2 = synbolTable.get(i);
-				pw1.println((i+1) + "\t"+tab2.value+"\t"+tab2.type + tab2.tpoint+"\t"+tab2.cat+"\t"+tab2.offset+"\t"+tab2.lengthoff);
+				pw1.println((i+1) + "\t"+tab2.value+"\t"+tab2.type+tab2.index+"\t"+tab2.cat+"\t"+tab2.offset+"\t"+tab2.lengthoff);
 				pw1.println("----------------------------------------------------------------------------------------------");
 			}
 		}else{
@@ -1420,7 +1459,7 @@ public class Parser {
 				tab3 = ainfTable.get(i);
 				pw1.println((i+1) + "\t"+tab3.type.value+"\t"+tab3.low
 						+"\t"+ tab3.up+"\t"+tab3.typeValue
-						+tab3.tpoint+"\t"+tab3.offsize);
+						+tab3.type.index+"\t"+tab3.offsize);
 				pw1.println("----------------------------------------------------------------------------------------------");
 			}
 		}else{
@@ -1502,7 +1541,7 @@ class typeNode{//类型表结点
 	String type;		//类型==>语义动作时根据语义栈中的声明类型关键字传入整型:int,字符:char,布尔:bool,浮点:float
 	int tpoint;			//类型指针==>根据type信息得到整型:0,字符:0,布尔:0,浮点:0
 	int lengthoff;		//所占内存字节数==>根据type信息得到整型:4,字符:1,布尔:1,浮点:8
-	
+	int index=0;
 	typeNode(){}
 	typeNode(String type)
 	{
@@ -1528,10 +1567,15 @@ class typeNode{//类型表结点
 			this.lengthoff=0;//在自己的表里设置
 		}
 	}
+	
 	public void setlengthoff(int off){
 		this.lengthoff=off;
 	}
-
+	
+	public void setIndex(int index){
+		this.index=index;
+	}
+	
 	public boolean equals(Object obj)
 	{
 		if(!(obj instanceof typeNode))
@@ -1539,37 +1583,65 @@ class typeNode{//类型表结点
 			return false;
 		}
 		typeNode ty=(typeNode)obj;
-		return this.type.equals(ty.type)&&(this.tpoint==ty.tpoint);
+		if(this.type=="数组"||this.type=="结构体")
+		{
+			return false;
+		}else{
+			return this.type.equals(ty.type)&&(this.tpoint==ty.tpoint);
+		}
 	}
 }
 
 class ainfNode{//数组表结点
 	int low=0;
 	int up;//数组长度下标-1
-	
 	SynbolNode type;//数组结点(存着数组结点的名字value)
+	String value;
 	String typeValue;//值单元类型
 	int tpoint;//值单元对应的指针下标
-	int offsize;
+	int offsize;//值单元总长度:成分类型
 	
 	int clen;//值单元个数
+	
+	int index =0;
 	ainfNode(){
 		
 	}
 
 	ainfNode(int up,SynbolNode ty){//用上界初始化，以及结点的类型
 		type=ty;
-		this.up=up-1;
-		this.clen=this.up-low+1;//值单元个数
+		this.value=ty.value;//获得数组结点名字
+		this.up=up;
+		this.clen=this.up-low;//值单元个数
 		this.typeValue=type.typenode.type;
 		this.tpoint=type.typenode.tpoint;
 		this.offsize=this.clen*(ty.typenode.lengthoff);
 	}
 	
+	public void setPreDiemension(String tv,int tp,int off){//修改上一维的成分类型为数组,
+		this.typeValue=tv;
+		this.tpoint=tp;
+		type.lengthoff=off;//单元长度
+		this.offsize=this.clen*off;//总成分长度
+	}
+	
+	public boolean equals(Object obj)//根据名字找到同一个数组
+	{
+		if(!(obj instanceof ainfNode))
+		{
+			return false;
+		}
+		ainfNode af=(ainfNode)obj;
+		return this.value.equals(af.value);
+	}
+	public void setIndex(int index){
+		this.index=index;
+	}
 }
 
 class rinfNode{//结构体结点
 	String value;//结构体名,填符号表时赋给value
+	int index=0;
 	
 	Vector<String> off_value;//结构体内变量的名字
 	Vector<Integer> off_n;//结构体内变量的偏移值(相对于结构体而言)
@@ -1594,6 +1666,10 @@ class rinfNode{//结构体结点
 		type_n.add(type);
 		type_n_tpoint.add(type.typenode.tpoint);
 		off_value.add(type.value);//将结构体里声明的变量放进结构体表中
+	}
+	
+	public void setIndex(int index){
+		this.index=index;
 	}
 	
 }

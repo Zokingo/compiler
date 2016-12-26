@@ -2,11 +2,11 @@ package compiler;
 
 public class FourElement {
 	
-	int id;//四元式序号，为编程方便
-	String op;//操作符
-	String arg1;//第一个操作数
-	String arg2;//第二个操作数
-	Object result;//结果
+	int 	id;//四元式序号，为编程方便
+	String 	op;//操作符
+	String 	arg1;//第一个操作数
+	String 	arg2;//第二个操作数
+	Object 	result;//结果
 	
 	public FourElement(){
 	
