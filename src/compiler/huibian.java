@@ -77,8 +77,8 @@ public class huibian extends JFrame {
 					String temp1 = (j++) + " JL " + temp[3].substring(0,temp[3].length() - 1)  + "\n";
 					text.append(temp1);
 				}else{
-					String temp1 = (j++) +"未知四元式处理：后续待添加"+"\n";
-					text.append(temp1);
+					//String temp1 = (j++) +"未知四元式处理：后续待添加"+"\n";
+					//text.append(temp1);
 				}
 			}
 			j=j+1;

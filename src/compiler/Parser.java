@@ -11,7 +11,7 @@ import java.util.Stack;
 import java.util.Vector;
 /**
  * Óï·¨·ÖÎöÆ÷
- * @author ÖÓÇÙ
+ * @author 
  *
  */
 public class Parser {
