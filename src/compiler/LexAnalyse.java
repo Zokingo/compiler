@@ -152,7 +152,6 @@ public class LexAnalyse {
 		return flag;
 	}
 
-
 	/**
 	 * ÅĞ¶Ï×Ö·ûÊÇ·ñÎª×ÖÄ¸
 	 * 

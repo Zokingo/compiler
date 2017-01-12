@@ -184,6 +184,7 @@ public class MainFrame extends JFrame {
 					lexAnalyse=new LexAnalyse(sourseFile.getText());
 					synbolTablePath = lexAnalyse.outputConstList();
 					parser=new Parser(lexAnalyse);
+					
 					parser.grammerAnalyse();
 					TablePath=parser.outputTable();
 				} catch (IOException e1) {
@@ -210,21 +211,30 @@ public class MainFrame extends JFrame {
 			//@Override
 		public void actionPerformed(ActionEvent e) {
 			try {
+				boolean showFlag=true;
 				lexAnalyse=new LexAnalyse(sourseFile.getText());
 				parser=new Parser(lexAnalyse);
-				parser.grammerAnalyse();
-				fourElementPath=parser.outputFourElem();
+				if(parser.isFail()==true){
+					javax.swing.JOptionPane.showMessageDialog(null, "语法分析或语义分析未通过，不能进行四元式生成");
+					showFlag=false;
+				}
+				else{
+					parser.grammerAnalyse();
+					fourElementPath=parser.outputFourElem();
+					Toolkit toolkit = Toolkit.getDefaultToolkit();
+					Dimension screen = toolkit.getScreenSize();
+					InfoFrame inf = new InfoFrame("中间代码生成", fourElementPath);
+					inf.setSize(480,800);
+					inf.setLocation(screen.width / 2 - inf.getWidth() / 2, screen.height
+							/ 2 - inf.getHeight() / 2);
+					inf.setVisible(showFlag);
+				}
+				
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			Toolkit toolkit = Toolkit.getDefaultToolkit();
-			Dimension screen = toolkit.getScreenSize();
-			InfoFrame inf = new InfoFrame("中间代码生成", fourElementPath);
-			inf.setSize(480,800);
-			inf.setLocation(screen.width / 2 - inf.getWidth() / 2, screen.height
-					/ 2 - inf.getHeight() / 2);
-			inf.setVisible(true);
+			
 		}
 		});
 		
@@ -232,17 +242,27 @@ public class MainFrame extends JFrame {
 
 			//@Override
 			public void actionPerformed(ActionEvent e) {
+				boolean flag_huibian=true;
 				try {
 					lexAnalyse=new LexAnalyse(sourseFile.getText());
 					parser=new Parser(lexAnalyse);
-					parser.grammerAnalyse();
-					fourElementPath=parser.outputFourElem1();
+					if(parser.isFail()==true){
+						javax.swing.JOptionPane.showMessageDialog(null, "语法分析或语义分析未通过，不能进行目标代码生成");
+						flag_huibian=false;
+					}
+					else{
+						parser.grammerAnalyse();
+						fourElementPath=parser.outputFourElem1();
+						huibian inf = new huibian("目标代码生成", fourElementPath);
+						inf.setVisible(flag_huibian);
+						//flag_huibian=false;
+					}
+					
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					//e1.printStackTrace();
 				}
-				huibian inf = new huibian("目标代码生成", fourElementPath);
-				inf.setVisible(true);
+				
 			}
 		});
 		

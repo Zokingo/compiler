@@ -16,6 +16,11 @@ public class SynbolNode {//标识符总表结点
 	{
 		
 	}
+	SynbolNode(String value)
+	{
+		this.value=value;
+	}
+	
 	
 	SynbolNode(String value,String type,int offSystem)//传入单词的值,类型,系统数据地址偏移量:0开始
 	{
@@ -75,8 +80,19 @@ public class SynbolNode {//标识符总表结点
 		SynbolNode sn=(SynbolNode)obj;
 		return this.value.equals(sn.value);
 	}
+	
 	public void setIndex(int index){
 		this.index=index;
 	}
 
+	public String getType(String value)
+	{
+		if(this.value==value)
+		{
+			return this.type;//返回值的类型
+		}else{
+			return null;
+		}
+		
+	}
 }

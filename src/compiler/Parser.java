@@ -18,6 +18,9 @@ public class Parser {
 
 	private LexAnalyse  	lexAnalyse;//词法分析器
 	ArrayList<Word>			wordList		=new ArrayList<Word>();//单词表
+	ArrayList<ConstWord>	constList		=new ArrayList<ConstWord>();//常数表
+	
+	
 	Stack<AnalyseNode>		analyseStack	=new Stack<AnalyseNode>();//分析栈
 	Stack<String>			semanticStack	=new Stack<String>();//语义栈
 	
@@ -74,7 +77,13 @@ public class Parser {
 	Stack<Integer>			if_fj,if_rj,while_fj,while_rj,for_fj,for_rj;//if while for 跳转地址栈
 	Stack<String>			for_op=new Stack<String>();
 
-	
+	/**
+	 * 判断语法分析是否通过
+	 * 
+	 */
+	public boolean isFail() {
+		return graErrorFlag;//为真不通过
+	}
 	
 	public Parser(){
 			
@@ -84,6 +93,7 @@ public class Parser {
 	public Parser(LexAnalyse lexAnalyse){
 			this.lexAnalyse	=lexAnalyse;
 			this.wordList	=lexAnalyse.wordList;
+			this.constList	=lexAnalyse.constList;
 			init();
 		}
 
@@ -376,7 +386,7 @@ public class Parser {
 				analyseStack.remove(0);
 				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "if", null));
 				analyseStack.add(1,new AnalyseNode(AnalyseNode.TERMINAL, "(", null));
-				analyseStack.add(2,G);
+				analyseStack.add(2,E);
 				analyseStack.add(3,new AnalyseNode(AnalyseNode.TERMINAL, ")", null));
 				analyseStack.add(4,IF_HEAD);
 				analyseStack.add(5,IF_FJ);
@@ -396,7 +406,7 @@ public class Parser {
 				analyseStack.add(0,WHILE_HEAD);
 				analyseStack.add(1,new AnalyseNode(AnalyseNode.TERMINAL, "while", null));
 				analyseStack.add(2,new AnalyseNode(AnalyseNode.TERMINAL, "(", null));
-				analyseStack.add(3,G);
+				analyseStack.add(3,E);
 				analyseStack.add(4,new AnalyseNode(AnalyseNode.TERMINAL, ")", null));
 				analyseStack.add(5,DO);
 				analyseStack.add(6,WHILE_FJ);
@@ -416,7 +426,7 @@ public class Parser {
 				analyseStack.add(4,Z);
 				analyseStack.add(5,new AnalyseNode(AnalyseNode.TERMINAL, ";", null));
 				analyseStack.add(6,FOR_LINE_RJ);//存真跳点
-				analyseStack.add(7,G);
+				analyseStack.add(7,E);
 				analyseStack.add(8,FOR_FJ);
 				analyseStack.add(9,new AnalyseNode(AnalyseNode.TERMINAL, ";", null));
 				analyseStack.add(10,Q);
@@ -722,7 +732,6 @@ public class Parser {
 			}else if(firstWord.type.equals(Word.CHAR_CONST)){
 				analyseStack.remove(0);
 				analyseStack.add(0,new AnalyseNode(AnalyseNode.TERMINAL, "ch", null));
-				//
 				semanticStack.push(firstWord.value);
 			}else if(firstWord.type.equals(Word.FLOAT_CONST)){
 				analyseStack.remove(0);
@@ -1153,21 +1162,59 @@ public class Parser {
 			semanticStack.pop();
 		}//赋值语义动作
 		else if(top.name.equals("@EQ")){
+			boolean flag_sem=true;
 			OP="=";
 			ARG1=semanticStack.pop();
 			RES=semanticStack.pop();
-			FourElement fourElem=new FourElement(++fourElemCount,OP,ARG1," ",RES);
-			fourElemList.add(fourElem);
+			
+			if(synbolTable.contains(new SynbolNode(RES))==false){//找不到定义的单词
+				errorCount++;
+				error=new Error(errorCount,"语义分析出错,单词未定义",firstWord.line,new Word(firstWord.id,RES,firstWord.type,firstWord.line));
+				errorList.add(error);	
+				graErrorFlag=true;
+				flag_sem=false;
+			}
+			
+			if(firstWord.type=="整形常量"||firstWord.type=="字符常量"||firstWord.type=="布尔常量"||firstWord.type=="浮点常量"){//操作数是常量
+				 if(constList.contains(new ConstWord(firstWord.value,firstWord.type))==false){
+					 	errorCount++;
+						error=new Error(errorCount,"语义分析出错,单词未定义",firstWord.line,firstWord);
+						errorList.add(error);	
+						graErrorFlag=true;
+						flag_sem=false;
+				 }
+			}else if(firstWord.type=="标志符"){
+				if(synbolTable.contains(new SynbolNode(ARG1))==false){//找不到定义的单词
+					errorCount++;
+					error=new Error(errorCount,"语义分析出错,单词未定义",firstWord.line,firstWord);
+					errorList.add(error);	
+					graErrorFlag=true;
+					flag_sem=false;
+				}
+			}
+			
+			
+			//
+			if(flag_sem==true){
+				FourElement fourElem=new FourElement(++fourElemCount,OP,ARG1," ",RES);
+				fourElemList.add(fourElem);
+			}/*else{//未定义的标识符
+				errorCount++;
+				error=new Error(errorCount,"语义分析出错,单词未定义",firstWord.line,new Word(firstWord.id,RES,firstWord.type,firstWord.line));
+				errorList.add(error);	
+				//=true;
+			}*/
+			
+			//
 			OP=null;
 			analyseStack.remove(0);
 		}else if(top.name.equals("@EQ_K")){
 			analyseStack.remove(0);
 			//
-		}else if(top.name.equals("@EQ_U'")){
+		}else if(top.name.equals("@EQ_U'")){//添加简单类型赋值类型匹配检查
 			OP="=";
 			ARG1=semanticStack.pop();
 			RES=semanticStack.pop();
-			//fourElemCount++;
 			FourElement fourElem=new FourElement(++fourElemCount,OP,ARG1," ",RES);
 			fourElemList.add(fourElem);
 			OP=null;
@@ -1346,6 +1393,9 @@ public class Parser {
 	//输出四元式
 	public String outputFourElem1() throws IOException{
 		
+		if(this.isFail()==true)
+			javax.swing.JOptionPane.showMessageDialog(null, "语法分析或语义分析未通过，不能进行目标代码生成");
+		
 		File file=new File("./output/");
 		if(!file.exists()){
 			file.mkdirs();
@@ -1370,6 +1420,9 @@ public class Parser {
 	
 	//得到四元式
 	public String outputFourElem() throws IOException{
+		
+		if(this.isFail()==true)
+			javax.swing.JOptionPane.showMessageDialog(null, "语法分析或语义分析未通过，不能进行四元式生成");
 		
 		File file=new File("./output/");
 		if(!file.exists()){

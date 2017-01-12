@@ -46,4 +46,15 @@ public class ConstWord
 		ConstWord cw=(ConstWord)obj;
 		return this.value.equals(cw.value)&&this.type.equals(cw.type);
 	}
+	
+	public String getType(String value)
+	{
+		if(this.value==value)
+		{
+			return this.type;//返回值的类型
+		}else{
+			return null;
+		}
+		
+	}
 }

@@ -2,6 +2,7 @@
 int main()
 {
   int a = 10;
+  //int b;
   int b;
   int c=0;
 

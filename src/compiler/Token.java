@@ -45,8 +45,8 @@ public class Token {
 		this.value=value;
 		this.type=type;
 	}
-	
-	void set_i(String value)//根据获得的value来设定对应的i
+	//根据获得的value来设定对应的i
+	void set_i(String value)
 	{
 		
 	}

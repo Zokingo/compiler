@@ -29,10 +29,12 @@ public class huibian extends JFrame {
 	}
 	
 	public huibian(String title,String fileName){
+		
 		huibian.title=title;
 		huibian.fileName=fileName;
 		init();
 		this.setTitle(title);
+		
 		try {
 			String str[] =readFile(fileName).split("\n");//妈蛋修改完四元式之后，文本格式出错了
 			String temp2="1 example   SEGMENT\n2 ASSUME CS:example,DS:example\n";
@@ -88,7 +90,8 @@ public class huibian extends JFrame {
 		} catch (IOException e) {
 			
 			e.printStackTrace();
-		}	
+		}
+			
 	}
 	
 	private void init() {
@@ -149,8 +152,8 @@ public class huibian extends JFrame {
 	}
 	
 	public static void main(String[] args) {
-		huibian inf=new huibian("测试","test.txt");
-		inf.setVisible(true);
+		//huibian inf=new huibian("测试","test.txt");
+		//inf.setVisible(true);
 	}
 
 }

@@ -9,11 +9,7 @@ public class Error {
 	
 	public Error(){
 	}
-	//public Error(int id,String info,int line){
-	//	this.id=id;
-	//	this.info=info;
-	//	this.line=line;
-	//}
+	
 	
 	public Error(int id,String info,int line,Word word){
 		this.id=id;
